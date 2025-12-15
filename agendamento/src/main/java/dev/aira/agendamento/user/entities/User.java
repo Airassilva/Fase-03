@@ -1,5 +1,6 @@
 package dev.aira.agendamento.user.entities;
 
+import dev.aira.agendamento.user.dtos.UserUpdateRequest;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,7 +38,7 @@ public class User implements UserDetails {
     private Boolean active = true;
 
     @NotNull
-    private TypeUser typeUser;
+    private UserType userType;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -47,7 +48,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + this.typeUser.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.userType.name()));
     }
 
     @Override
@@ -60,10 +61,19 @@ public class User implements UserDetails {
         return this.email;
     }
 
-    public User(String email, String password, String name, TypeUser typeUser) {
+    public void update(UserUpdateRequest dto) {
+        if (dto.getPassword() != null) {
+            this.password = dto.getPassword();
+        }
+        if (dto.getEmail() != null) {
+            this.email = dto.getEmail();
+        }
+    }
+
+    public User(String email, String password, String name, UserType userType) {
         this.email = email;
         this.password = password;
         this.name = name;
-        this.typeUser = typeUser;
+        this.userType = userType;
     }
 }

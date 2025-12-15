@@ -27,7 +27,7 @@ class ExistingEmailValidationTest {
     ExistingEmailValidation existingEmailValidation;
 
     @Test
-    void test_create_new_user_with_not_existing_email() throws ExistingEmailException {
+    void test_create_new_user_with_not_existing_email() {
         User user = UserMother.userBase();
         when(userRepository.findByEmail("teste@email.com"))
                 .thenReturn(Optional.empty());

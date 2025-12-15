@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public enum TypeUser {
+public enum UserType {
     MEDICO("medico"),
     ENFERMEIRO("enfermeiro"),
     PACIENTE("paciente");
