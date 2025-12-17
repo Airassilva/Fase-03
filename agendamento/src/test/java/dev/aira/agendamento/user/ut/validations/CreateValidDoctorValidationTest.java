@@ -30,7 +30,7 @@ class CreateValidDoctorValidationTest {
     private CreateValidDoctorValidation createValidDoctorValidation;
 
     @Test
-    void test_valid_doctor_creation() {
+    void test_creatte_doctor_valid() {
         UUID id = UUID.randomUUID();
         User user = UserMother.userSavedDoctor(id);
         Consultation consultation = ConsultationMother.consultationBase(id);
