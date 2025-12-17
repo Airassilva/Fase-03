@@ -13,6 +13,12 @@ public class UserMother {
        return new User("teste@email.com", "1234", "teste", UserType.PACIENTE);
     }
 
+    public static User userInactive(){
+        User base = userBase();
+        base.deactivate();
+        return base;
+    }
+
     public static User userSaved(UUID id) {
         User base = userBase();
         return new User(

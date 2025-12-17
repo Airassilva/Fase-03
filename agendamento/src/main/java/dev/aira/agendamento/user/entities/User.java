@@ -71,6 +71,26 @@ public class User implements UserDetails {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void deactivate() {
+        if (Boolean.FALSE.equals(this.active)) {
+            return;
+        }
+        this.active = false;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void activate() {
+        if (Boolean.TRUE.equals(this.active)) {
+            return;
+        }
+        this.active = true;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
     public User(String email, String password, String name, UserType userType) {
             this.email = email;
             this.password = password;

@@ -1,6 +1,7 @@
 package dev.aira.agendamento.user.ut.services;
 
 import dev.aira.agendamento.exceptions.EmailNotFoundException;
+import dev.aira.agendamento.exceptions.UserInactiveException;
 import dev.aira.agendamento.exceptions.UserNotFoundException;
 import dev.aira.agendamento.objectMother.UserMother;
 import dev.aira.agendamento.user.dtos.UserUpdateRequest;
@@ -8,6 +9,7 @@ import dev.aira.agendamento.user.entities.User;
 import dev.aira.agendamento.user.repositories.UserRepository;
 import dev.aira.agendamento.user.service.UserService;
 import dev.aira.agendamento.user.validations.UserCreateValidation;
+import dev.aira.agendamento.user.validations.UserUpdateValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,8 +29,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -39,6 +40,9 @@ class UserServiceTest {
     @Mock
     private UserCreateValidation validation;
 
+    @Mock
+    private UserUpdateValidation updateValidation;
+
     @InjectMocks
     private UserService userService;
 
@@ -46,7 +50,8 @@ class UserServiceTest {
     void setup() {
         userService = new UserService(
                 userRepository,
-                List.of(validation)
+                List.of(validation),
+                List.of(updateValidation)
         );
     }
 
@@ -63,17 +68,7 @@ class UserServiceTest {
     }
 
     @Test
-    void test_with_user_when_email_exists() {
-        User user = UserMother.userBase();
-        when(userRepository.findByEmail(user.getEmail()))
-                .thenReturn(Optional.of(user));
-
-        User result = userService.findByEmail(user.getEmail());
-        assertThat(result, is(user));
-    }
-
-    @Test
-    void test_with_user_when_email_not_found() throws EmailNotFoundException {
+    void test_create_user_when_email_not_found() throws EmailNotFoundException {
         when(userRepository.findByEmail("teste@email.com"))
                 .thenReturn(Optional.empty());
 
@@ -84,17 +79,7 @@ class UserServiceTest {
     }
 
     @Test
-    void test_with_user_when_id_exists() {
-        User user = UserMother.userBase();
-        when(userRepository.findById(user.getId()))
-                .thenReturn(Optional.of(user));
-
-        User result = userService.findById(user.getId());
-        assertThat(result, is(user));
-    }
-
-    @Test
-    void test_with_user_when_id_not_found() throws UserNotFoundException {
+    void test_create_user_when_id_not_found() throws UserNotFoundException {
         UUID id = UUID.randomUUID();
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -116,6 +101,7 @@ class UserServiceTest {
         assertThat(result.getContent(), hasSize(1));
         assertThat(result.getContent().getFirst(), is(user));
         assertThat(result.getTotalElements(), is(1L));
+        verify(userRepository, times(1)).findAll(pageable);
     }
 
     @Test
@@ -126,6 +112,26 @@ class UserServiceTest {
         assertThrows(
                 UserNotFoundException.class,
                 () -> userService.update(id,user));
+        verify(userRepository).findById(id);
+    }
+
+    @Test
+    void test_update_user_is_inactive() throws UserInactiveException {
+        UserUpdateRequest userUpdateRequest = UserMother.userUpdateRequest();
+        User user = UserMother.userInactive();
+        UUID id = user.getId();
+        when(userRepository.findById(id))
+                .thenReturn(Optional.of(user));
+        doThrow(UserInactiveException.class)
+                .when(updateValidation).validation(user);
+
+        assertThrows(
+                UserInactiveException.class,
+                () -> userService.update(id,userUpdateRequest)
+        );
+
+        verify(userRepository).findById(user.getId());
+        verify(updateValidation).validation(user);
     }
 
     @Test

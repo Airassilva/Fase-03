@@ -1,9 +1,6 @@
 package dev.aira.agendamento.exceptions.handler;
 
-import dev.aira.agendamento.exceptions.BadRequestBusinessException;
-import dev.aira.agendamento.exceptions.NotFoundBusinessException;
-import dev.aira.agendamento.exceptions.UnauthorizedAccessBusinessException;
-import dev.aira.agendamento.exceptions.UnavailableBusinessException;
+import dev.aira.agendamento.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -44,6 +41,13 @@ public class ApiExceptionHandler {
     public ResponseEntity<ApiError> handleUnavailable(UnavailableBusinessException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(new ApiError(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InactiveException.class)
+    public ResponseEntity<ApiError> handleInactive(InactiveException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
                 .body(new ApiError(ex.getMessage()));
     }
 

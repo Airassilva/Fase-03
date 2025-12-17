@@ -1,6 +1,7 @@
 package dev.aira.agendamento.user.ut.controllers;
 
 import dev.aira.agendamento.exceptions.ExistingEmailException;
+import dev.aira.agendamento.exceptions.UserInactiveException;
 import dev.aira.agendamento.exceptions.UserNotFoundException;
 import dev.aira.agendamento.objectMother.UserMother;
 import dev.aira.agendamento.user.controller.UserController;
@@ -28,8 +29,8 @@ import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -102,6 +103,18 @@ class UserControllerTest {
     }
 
     @Test
+    void test_update_user_inactive(){
+        UUID id = UUID.randomUUID();
+        UserUpdateRequest userUpdateRequest = UserMother.userUpdateRequest();
+
+        when(userService.update(id, userUpdateRequest))
+                .thenThrow(UserInactiveException.class);
+
+        assertThrows(UserInactiveException.class,
+                () -> userController.update(userUpdateRequest, id));
+    }
+
+    @Test
     void test_update_user_with_user_id_not_found(){
         UUID id = UUID.randomUUID();
         UserUpdateRequest userUpdateRequest = UserMother.userUpdateRequest();
@@ -153,6 +166,44 @@ class UserControllerTest {
 
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
         assertThat(response.getBody(), notNullValue());
+    }
+
+    @Test
+    void test_desactivate_user(){
+        UUID id = UUID.randomUUID();
+        doNothing().when(userService).desactiveUser(id);
+        ResponseEntity<Void> response = userController.deactivateUser(id);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(userService).desactiveUser(id);
+    }
+
+    @Test
+    void test_desactivate_user_not_found(){
+        UUID id = UUID.randomUUID();
+        doThrow(UserNotFoundException.class).when(userService).desactiveUser(id);
+        assertThrows(UserNotFoundException.class,
+                () -> userController.deactivateUser(id));
+        verify(userService).desactiveUser(id);
+    }
+
+    @Test
+    void test_activate_user(){
+        UUID id = UUID.randomUUID();
+        doNothing().when(userService).activateUser(id);
+        ResponseEntity<Void> response = userController.activateUser(id);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(userService).activateUser(id);
+    }
+
+    @Test
+    void test_activate_user_not_found(){
+        UUID id = UUID.randomUUID();
+        doThrow(UserNotFoundException.class).when(userService).activateUser(id);
+        assertThrows(UserNotFoundException.class,
+                () -> userController.activateUser(id));
+        verify(userService).activateUser(id);
     }
 
     @Test

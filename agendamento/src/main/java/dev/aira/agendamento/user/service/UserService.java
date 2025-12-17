@@ -6,6 +6,7 @@ import dev.aira.agendamento.user.dtos.UserUpdateRequest;
 import dev.aira.agendamento.user.entities.User;
 import dev.aira.agendamento.user.repositories.UserRepository;
 import dev.aira.agendamento.user.validations.UserCreateValidation;
+import dev.aira.agendamento.user.validations.UserUpdateValidation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final List<UserCreateValidation> userCreateValidation;
+    private final List<UserUpdateValidation> userUpdateValidation;
 
     public User create(User user) {
         userCreateValidation.forEach(v -> v.validation(user));
@@ -26,9 +28,10 @@ public class UserService {
     }
 
     public User update (UUID id, UserUpdateRequest updateRequest) {
-        User usuarioEncontrado = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        usuarioEncontrado.update(updateRequest);
-        return userRepository.save(usuarioEncontrado);
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        userUpdateValidation.forEach(v -> v.validation(user));
+        user.update(updateRequest);
+        return userRepository.save(user);
     }
 
     public User findByEmail (String email) {
@@ -41,6 +44,20 @@ public class UserService {
 
     public Page<User> findAll(Pageable pageable) {
         return userRepository.findAll(pageable);
+    }
+
+    public void desactiveUser(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new);
+        user.deactivate();
+        userRepository.save(user);
+    }
+
+    public void activateUser(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new);
+        user.activate();
+        userRepository.save(user);
     }
 
     public void delete(UUID id) {
