@@ -19,4 +19,17 @@ public class ConsultationMother {
                     "skin disease"
         );
     }
+
+    public static Consultation consultatioWithTime (LocalDateTime time){
+        UUID userId = UUID.randomUUID();
+        UUID doctorId = UUID.randomUUID();
+        return new Consultation(
+                doctorId,
+                userId,
+                time,
+                "dermatologist",
+                ConsultationStatus.AGENDADA,
+                "skin disease"
+        );
+    }
 }
