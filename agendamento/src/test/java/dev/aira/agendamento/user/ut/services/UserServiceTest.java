@@ -59,7 +59,7 @@ class UserServiceTest {
         assertThat(result.getPassword(), is(user.getPassword()));
         assertThat(result.getName(), is(user.getName()));
         assertThat(result.getUserType(), is(user.getUserType()));
-        verify(validation).valida(user);
+        verify(validation).validation(user);
     }
 
     @Test

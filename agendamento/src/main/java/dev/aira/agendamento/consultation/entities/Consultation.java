@@ -8,6 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,9 +22,13 @@ public class Consultation {
     private UUID id;
 
     @NotBlank
+    @Field("doctor_id")
     private UUID doctorId;
+
     @NotBlank
+    @Field("patient_id")
     private UUID patientId;
+
     @NotBlank
     private LocalDateTime consultationDate;
 
@@ -40,5 +45,16 @@ public class Consultation {
 
     @LastModifiedDate
     private LocalDateTime updatedDate;
+
+    public Consultation(UUID doctorId, UUID patientId, LocalDateTime consultationDate, String specialty, ConsultationStatus status, String observation) {
+        this.doctorId = doctorId;
+        this.patientId = patientId;
+        this.consultationDate = consultationDate;
+        this.specialty = specialty;
+        this.status = status;
+        this.observation = observation;
+        this.createdDate = LocalDateTime.now();
+        this.updatedDate = LocalDateTime.now();
+    }
 }
 

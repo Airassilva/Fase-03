@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public class UserMother {
     public static User userBase() {
-       return new User("teste@email.com", "1234", "teste", UserType.MEDICO);
+       return new User("teste@email.com", "1234", "teste", UserType.PACIENTE);
     }
 
     public static User userSaved(UUID id) {
@@ -21,6 +21,17 @@ public class UserMother {
                 base.getPassword(),
                 base.getName(),
                 base.getUserType()
+        );
+    }
+
+    public static User userSavedDoctor(UUID id) {
+        User base = userBase();
+        return new User(
+                id,
+                base.getEmail(),
+                base.getPassword(),
+                base.getName(),
+                UserType.MEDICO
         );
     }
 

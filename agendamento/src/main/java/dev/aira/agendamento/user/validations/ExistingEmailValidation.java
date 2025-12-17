@@ -13,7 +13,7 @@ public class ExistingEmailValidation implements UserCreateValidation {
     private final UserRepository userRepository;
 
     @Override
-    public void valida(User user) {
+    public void validation(User user) {
         User userEncontrado = userRepository.findByEmail(user.getEmail()).orElse(null);
         if (userEncontrado != null) {
             throw new ExistingEmailException();

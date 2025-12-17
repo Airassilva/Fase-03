@@ -21,7 +21,7 @@ public class UserService {
     private final List<UserCreateValidation> userCreateValidation;
 
     public User create(User user) {
-        userCreateValidation.forEach(v -> v.valida(user));
+        userCreateValidation.forEach(v -> v.validation(user));
         return userRepository.save(user);
     }
 

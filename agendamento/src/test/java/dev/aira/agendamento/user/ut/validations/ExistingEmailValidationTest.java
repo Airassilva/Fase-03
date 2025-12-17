@@ -32,7 +32,7 @@ class ExistingEmailValidationTest {
         when(userRepository.findByEmail("teste@email.com"))
                 .thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> existingEmailValidation.valida(user));
+        assertDoesNotThrow(() -> existingEmailValidation.validation(user));
     }
 
     @Test
@@ -44,7 +44,7 @@ class ExistingEmailValidationTest {
                 .thenReturn(Optional.of(userExisting));
         assertThrows(
                 ExistingEmailException.class,
-                () -> existingEmailValidation.valida(user)
+                () -> existingEmailValidation.validation(user)
         );
     }
 }
