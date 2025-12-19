@@ -10,20 +10,23 @@ import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
-public class ConsultationDoctorAvailabilityValidation implements ConsultationCreateValidation{
+public class UpdateDoctorAvailabilityValidation implements ConsultationUpdateValidation {
 
     private final ConsultationRepository consultationRepository;
-    public static final int CONSULTATION_DURATION_MINUTES = 60;
 
     @Override
     public void validation(Consultation consultation) {
         LocalDateTime start = consultation.getConsultationDate();
-        LocalDateTime end = start.plusMinutes(CONSULTATION_DURATION_MINUTES);
+        LocalDateTime end = start.plusMinutes(60);
 
-        boolean doctorHasConflict =
-                consultationRepository.existsDoctorConflict(consultation.getDoctorId(), start, end);
-
-        if (doctorHasConflict) {
+        boolean conflict =
+                consultationRepository.existsDoctorConflictExcludingConsultation(
+                        consultation.getDoctorId(),
+                        start,
+                        end,
+                        consultation.getId()
+                );
+        if (conflict) {
             throw new DoctorUnavailableBusinessException();
         }
     }

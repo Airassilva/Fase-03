@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class CreateValidDoctorValidation implements ConsultationCreateValidation {
+public class CreateValidDoctorValidation implements ConsultationCreateValidation, ConsultationUpdateValidation {
     private final UserRepository userRepository;
 
     @Override

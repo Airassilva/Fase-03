@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 @Component
-public class ConsultationTimeValidation implements ConsultationCreateValidation{
+public class ConsultationTimeValidation implements ConsultationCreateValidation, ConsultationUpdateValidation{
 
     @Override
     public void validation(Consultation consultation) {

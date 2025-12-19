@@ -29,4 +29,16 @@ public interface ConsultationRepository extends MongoRepository<Consultation, UU
             }
             """)
     boolean existsPatientConflict(UUID patientId, LocalDateTime start, LocalDateTime end);
+
+    @Query("""
+            {
+              doctorId: ?0,
+              consultationDate: {
+                $lt: ?2,
+                $gte: ?1
+              },
+              _id: { $ne: ?3 }
+            }
+           """)
+    boolean existsDoctorConflictExcludingConsultation(UUID doctorId, LocalDateTime start, LocalDateTime end, UUID consultationId);
 }

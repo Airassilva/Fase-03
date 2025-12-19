@@ -68,7 +68,6 @@ public class User implements UserDetails {
         if (dto.getEmail() != null) {
             this.email = dto.getEmail();
         }
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void deactivate() {
@@ -76,7 +75,6 @@ public class User implements UserDetails {
             return;
         }
         this.active = false;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void activate() {
@@ -84,7 +82,6 @@ public class User implements UserDetails {
             return;
         }
         this.active = true;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public boolean isActive() {
@@ -96,8 +93,6 @@ public class User implements UserDetails {
             this.password = password;
             this.name = name;
             this.userType = userType;
-            this.createdAt = LocalDateTime.now();
-            this.updatedAt = LocalDateTime.now();
     }
 
     public User(UUID id,String email, String password, String name, UserType userType) {

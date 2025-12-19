@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
-public class ConsultationPatientAvailabilityValidation implements ConsultationCreateValidation{
+public class CreateConsultationPatientAvailabilityValidation implements ConsultationCreateValidation{
 
     private final ConsultationRepository  consultationRepository;
     private static final int CONSULTATION_DURATION_MINUTES = 60;

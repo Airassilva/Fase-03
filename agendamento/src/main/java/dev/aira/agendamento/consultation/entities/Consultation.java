@@ -1,5 +1,6 @@
 package dev.aira.agendamento.consultation.entities;
 
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -21,18 +22,19 @@ public class Consultation {
     @Id
     private UUID id;
 
-    @NotBlank
+    @NotBlank(message = "Doctor is required!")
     @Field("doctor_id")
     private UUID doctorId;
 
-    @NotBlank
+    @NotBlank(message = "Patient is required!")
     @Field("patient_id")
     private UUID patientId;
 
-    @NotBlank
+    @NotBlank(message = "Consultation date is required!")
+    @Future(message = "The date of the consultation must be in the future!")
     private LocalDateTime consultationDate;
 
-    @NotBlank
+    @NotBlank(message = "Specialty is required!")
     private String specialty;
 
     @NotNull
@@ -53,8 +55,6 @@ public class Consultation {
         this.specialty = specialty;
         this.status = status;
         this.observation = observation;
-        this.createdDate = LocalDateTime.now();
-        this.updatedDate = LocalDateTime.now();
     }
 }
 

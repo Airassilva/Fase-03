@@ -2,8 +2,8 @@ package dev.aira.agendamento.user.ut.validations;
 
 import dev.aira.agendamento.consultation.entities.Consultation;
 import dev.aira.agendamento.consultation.repositories.ConsultationRepository;
-import dev.aira.agendamento.consultation.validations.ConsultationDoctorAvailabilityValidation;
-import dev.aira.agendamento.exceptions.DoctorUnavailableBusinessException;
+import dev.aira.agendamento.consultation.validations.CreateConsultationPatientAvailabilityValidation;
+import dev.aira.agendamento.exceptions.PatientUnavailableBusinessException;
 import dev.aira.agendamento.objectMother.ConsultationMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,22 +13,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
-import static dev.aira.agendamento.consultation.validations.ConsultationDoctorAvailabilityValidation.CONSULTATION_DURATION_MINUTES;
+import static dev.aira.agendamento.consultation.validations.CreateConsultationDoctorAvailabilityValidation.CONSULTATION_DURATION_MINUTES;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ConsultationDoctorAvailabilityValidationTest {
+class CreateConsultationPatientAvailabilityValidationTest {
 
     @Mock
-    private ConsultationRepository  consultationRepository;
+    private ConsultationRepository consultationRepository;
 
     @InjectMocks
-    private ConsultationDoctorAvailabilityValidation consultationDoctorAvailabilityValidation;
+    private CreateConsultationPatientAvailabilityValidation createConsultationPatientAvailabilityValidation;
 
     @Test
-    void test_doctor_available() {
+    void test_patient_available() {
         LocalDateTime validDateTime =
                 LocalDateTime.now().plusDays(1)
                         .withHour(10)
@@ -40,17 +40,17 @@ class ConsultationDoctorAvailabilityValidationTest {
         LocalDateTime end = start.plusMinutes(CONSULTATION_DURATION_MINUTES);
 
         when(consultationRepository
-                .existsDoctorConflict(consultation.getDoctorId(), start, end))
+                .existsPatientConflict(consultation.getPatientId(), start, end))
                 .thenReturn(false);
 
         assertDoesNotThrow(
-                () -> consultationDoctorAvailabilityValidation
+                () -> createConsultationPatientAvailabilityValidation
                         .validation(consultation)
         );
     }
 
     @Test
-    void test_doctor_unavailable() {
+    void test_patient_unavailable() {
         LocalDateTime validDateTime =
                 LocalDateTime.now().plusDays(1)
                         .withHour(10)
@@ -62,12 +62,12 @@ class ConsultationDoctorAvailabilityValidationTest {
         LocalDateTime end = start.plusMinutes(CONSULTATION_DURATION_MINUTES);
 
         when(consultationRepository
-                .existsDoctorConflict(consultation.getDoctorId(), start, end))
+                .existsPatientConflict(consultation.getPatientId(), start, end))
                 .thenReturn(true);
 
         assertThrows(
-                DoctorUnavailableBusinessException.class,
-                () -> consultationDoctorAvailabilityValidation.validation(consultation)
+                PatientUnavailableBusinessException.class,
+                () -> createConsultationPatientAvailabilityValidation.validation(consultation)
         );
     }
 }
