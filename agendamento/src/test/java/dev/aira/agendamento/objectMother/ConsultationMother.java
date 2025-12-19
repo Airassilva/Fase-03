@@ -20,6 +20,19 @@ public class ConsultationMother {
         );
     }
 
+    public static Consultation consultationBaseStatusFinalized (){
+        UUID id = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        return new Consultation(
+                id,
+                userId,
+                LocalDateTime.now(),
+                "dermatologist",
+                ConsultationStatus.FINALIZADA,
+                "skin disease"
+        );
+    }
+
     public static Consultation consultatioWithTime (LocalDateTime time){
         UUID userId = UUID.randomUUID();
         UUID doctorId = UUID.randomUUID();
