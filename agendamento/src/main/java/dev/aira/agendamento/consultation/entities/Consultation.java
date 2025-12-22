@@ -1,5 +1,6 @@
 package dev.aira.agendamento.consultation.entities;
 
+import dev.aira.agendamento.consultation.dtos.ConsultationUpdateRequest;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -47,6 +48,22 @@ public class Consultation {
 
     @LastModifiedDate
     private LocalDateTime updatedDate;
+
+    public void updateStatus(ConsultationStatus status) {
+        this.status = status;
+    }
+
+    public void consultationUpdate(ConsultationUpdateRequest dto) {
+        if(dto.getDoctorId().equals(this.doctorId)){
+            this.doctorId = dto.getDoctorId();
+        }
+        if(dto.getSpecialty().equals(this.specialty)){
+            this.specialty = dto.getSpecialty();
+        }
+       if(dto.getConsultationDate()!=null){
+           this.consultationDate = dto.getConsultationDate();
+       }
+    }
 
     public Consultation(UUID doctorId, UUID patientId, LocalDateTime consultationDate, String specialty, ConsultationStatus status, String observation) {
         this.doctorId = doctorId;

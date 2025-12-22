@@ -2,7 +2,7 @@ package dev.aira.agendamento.user.ut.validations;
 
 import dev.aira.agendamento.consultation.entities.Consultation;
 import dev.aira.agendamento.consultation.validations.UpdateConsultationStatusValidation;
-import dev.aira.agendamento.exceptions.ConsultationAlreadyFinalizedException;
+import dev.aira.agendamento.exceptions.ConsultationAlreadyFinalizedCancelledException;
 import dev.aira.agendamento.objectMother.ConsultationMother;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,10 +37,19 @@ class UpdateConsultationStatusValidationTest {
     }
 
     @Test
-    void test_update_consultation_status_invalid(){
+    void test_update_consultation_status_finalized(){
         Consultation consultation = ConsultationMother.consultationBaseStatusFinalized();
         assertThrows(
-                ConsultationAlreadyFinalizedException.class,
+                ConsultationAlreadyFinalizedCancelledException.class,
+                () -> updateConsultationStatusValidation.validation(consultation)
+        );
+    }
+
+    @Test
+    void test_update_consultation_status_canceled(){
+        Consultation consultation = ConsultationMother.consultationBaseStatusCancelled();
+        assertThrows(
+                ConsultationAlreadyFinalizedCancelledException.class,
                 () -> updateConsultationStatusValidation.validation(consultation)
         );
     }
