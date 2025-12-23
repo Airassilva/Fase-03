@@ -257,7 +257,7 @@ class ConsultationServiceTest {
 
         when(consultationRepository.findById(consultationId)).thenReturn(Optional.of(consultation));
         when(consultationRepository.save(any(Consultation.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        Consultation result = consultationService.confirmedConsultation(consultationId);
+        Consultation result = consultationService.confirmConsultation(consultationId);
 
         assertThat(result, is(consultation));
         assertThat(consultation.getStatus(), is(ConsultationStatus.AGENDADA));
@@ -284,7 +284,7 @@ class ConsultationServiceTest {
         when(consultationRepository.findById(consultationId)).thenReturn(Optional.of(consultation));
         when(consultationRepository.save(any(Consultation.class)))
                         .thenAnswer(invocation -> invocation.getArgument(0));
-        Consultation result = consultationService.finalizeConsultation(consultationId);
+        Consultation result = consultationService.finishConsultation(consultationId);
 
         assertThat(result, is(consultation));
         assertThat(consultation.getStatus(), is(ConsultationStatus.FINALIZADA));
@@ -299,7 +299,7 @@ class ConsultationServiceTest {
 
         assertThrows(
                 ConsultationNotFoundException.class,
-                () -> consultationService.confirmedConsultation(consultationId)
+                () -> consultationService.confirmConsultation(consultationId)
         );
         verify(consultationRepository).findById(consultationId);
         verify(consultationRepository, never()).save(any());
@@ -329,7 +329,7 @@ class ConsultationServiceTest {
 
         assertThrows(
                 ConsultationNotFoundException.class,
-                () -> consultationService.finalizeConsultation(consultationId)
+                () -> consultationService.finishConsultation(consultationId)
         );
         verify(consultationRepository).findById(consultationId);
         verify(consultationRepository, never()).save(any());

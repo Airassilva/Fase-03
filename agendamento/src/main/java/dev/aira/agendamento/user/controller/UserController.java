@@ -24,7 +24,7 @@ public class UserController {
     private final UserService userService;
     private final UserMapper  userMapper;
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest userRequest) {
         User usuarioEntity = userMapper.toEntity(userRequest);
         User usuarioSalvo = userService.create(usuarioEntity);

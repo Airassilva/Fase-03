@@ -3,12 +3,10 @@ package dev.aira.agendamento.user.mapper;
 import dev.aira.agendamento.user.dtos.UserRequest;
 import dev.aira.agendamento.user.dtos.UserResponse;
 import dev.aira.agendamento.user.entities.User;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class UserMapper {
 
     public User toEntity(UserRequest userRequest) {

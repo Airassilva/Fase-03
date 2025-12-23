@@ -40,7 +40,7 @@ public class ConsultationService {
         return consultationRepository.save(consultation);
     }
 
-    public Consultation confirmedConsultation(UUID consultationId){
+    public Consultation confirmConsultation(UUID consultationId){
         return updateStatus(consultationId, ConsultationStatus.AGENDADA);
     }
 
@@ -48,7 +48,7 @@ public class ConsultationService {
         return updateStatus(consultationId, ConsultationStatus.CANCELADA);
     }
 
-    public Consultation finalizeConsultation (UUID consultationId) {
+    public Consultation finishConsultation(UUID consultationId) {
         return updateStatus(consultationId, ConsultationStatus.FINALIZADA);
     }
 }

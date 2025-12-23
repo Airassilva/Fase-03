@@ -65,12 +65,11 @@ public class Consultation {
        }
     }
 
-    public Consultation(UUID doctorId, UUID patientId, LocalDateTime consultationDate, String specialty, ConsultationStatus status, String observation) {
+    public Consultation(UUID doctorId, UUID patientId, LocalDateTime consultationDate, String specialty, String observation) {
         this.doctorId = doctorId;
         this.patientId = patientId;
         this.consultationDate = consultationDate;
         this.specialty = specialty;
-        this.status = status;
         this.observation = observation;
     }
 }

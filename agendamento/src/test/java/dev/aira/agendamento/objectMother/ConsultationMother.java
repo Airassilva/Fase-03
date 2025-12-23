@@ -1,5 +1,7 @@
 package dev.aira.agendamento.objectMother;
 
+import dev.aira.agendamento.consultation.dtos.ConsultationRequest;
+import dev.aira.agendamento.consultation.dtos.ConsultationResponse;
 import dev.aira.agendamento.consultation.dtos.ConsultationUpdateRequest;
 import dev.aira.agendamento.consultation.entities.Consultation;
 import dev.aira.agendamento.consultation.entities.ConsultationStatus;
@@ -16,7 +18,6 @@ public class ConsultationMother {
                     userId,
                     LocalDateTime.now(),
                     "dermatologist",
-                    ConsultationStatus.PENDENTE,
                     "skin disease"
         );
     }
@@ -24,27 +25,29 @@ public class ConsultationMother {
     public static Consultation consultationBaseStatusFinalized (){
         UUID id = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        return new Consultation(
+        Consultation consultation = new Consultation(
                 id,
                 userId,
                 LocalDateTime.now(),
                 "dermatologist",
-                ConsultationStatus.FINALIZADA,
                 "skin disease"
         );
+        consultation.updateStatus(ConsultationStatus.FINALIZADA);
+        return consultation;
     }
 
     public static Consultation consultationBaseStatusCancelled (){
         UUID id = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        return new Consultation(
+        Consultation consultation = new Consultation(
                 id,
                 userId,
                 LocalDateTime.now(),
                 "dermatologist",
-                ConsultationStatus.CANCELADA,
                 "skin disease"
         );
+        consultation.updateStatus(ConsultationStatus.CANCELADA);
+        return consultation;
     }
 
     public static Consultation consultatioWithTime (LocalDateTime time){
@@ -55,7 +58,6 @@ public class ConsultationMother {
                 userId,
                 time,
                 "dermatologist",
-                ConsultationStatus.AGENDADA,
                 "skin disease"
         );
     }
@@ -75,6 +77,39 @@ public class ConsultationMother {
                     doctorId,
                     "ophthalmologist",
                     time
+        );
+    }
+
+    public static ConsultationRequest consultationRequest (){
+        UUID doctorId = UUID.randomUUID();
+        UUID patientId = UUID.randomUUID();
+        return new ConsultationRequest(
+                doctorId,
+                patientId,
+                LocalDateTime.now().plusDays(3),
+                "dermatologist",
+                "skin disease"
+        );
+    }
+
+    public static Consultation consultation(){
+        ConsultationRequest consultationRequest = consultationRequest();
+        return new Consultation(
+                consultationRequest.getDoctorId(),
+                consultationRequest.getPatientId(),
+                consultationRequest.getConsultationDate(),
+                consultationRequest.getSpecialty(),
+                consultationRequest.getObservation()
+        );
+    }
+
+    public static ConsultationResponse consultationResponse (){
+        Consultation consultation = consultation();
+        return new ConsultationResponse(
+                consultation.getDoctorId(),
+                consultation.getSpecialty(),
+                consultation.getStatus(),
+                consultation.getConsultationDate()
         );
     }
 }

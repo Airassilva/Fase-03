@@ -1,6 +1,7 @@
 package dev.aira.agendamento.consultation.dtos;
 
 import dev.aira.agendamento.consultation.entities.ConsultationStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class ConsultationResponse {
     private UUID doctorId;
     private String specialty;

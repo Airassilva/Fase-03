@@ -7,7 +7,6 @@ import dev.aira.agendamento.objectMother.ConsultationMother;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
@@ -18,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(MockitoExtension.class)
 class UpdateConsultationStatusValidationTest {
 
-    @Mock
     UpdateConsultationStatusValidation updateConsultationStatusValidation;
 
     @BeforeEach
@@ -39,6 +37,7 @@ class UpdateConsultationStatusValidationTest {
     @Test
     void test_update_consultation_status_finalized(){
         Consultation consultation = ConsultationMother.consultationBaseStatusFinalized();
+
         assertThrows(
                 ConsultationAlreadyFinalizedCancelledException.class,
                 () -> updateConsultationStatusValidation.validation(consultation)
@@ -48,6 +47,7 @@ class UpdateConsultationStatusValidationTest {
     @Test
     void test_update_consultation_status_canceled(){
         Consultation consultation = ConsultationMother.consultationBaseStatusCancelled();
+
         assertThrows(
                 ConsultationAlreadyFinalizedCancelledException.class,
                 () -> updateConsultationStatusValidation.validation(consultation)
