@@ -3,10 +3,12 @@ package dev.aira.agendamento.consultation.repositories;
 import dev.aira.agendamento.consultation.entities.Consultation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Repository
 public interface ConsultationRepository extends MongoRepository<Consultation, UUID> {
     @Query("""
             {

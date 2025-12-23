@@ -10,6 +10,7 @@ import dev.aira.agendamento.consultation.service.ConsultationService;
 import dev.aira.agendamento.exceptions.ConsultationAlreadyFinalizedCancelledException;
 import dev.aira.agendamento.exceptions.ConsultationNotFoundException;
 import dev.aira.agendamento.exceptions.InvalidDoctorUserException;
+import dev.aira.agendamento.message.ConsultationProducer;
 import dev.aira.agendamento.objectMother.ConsultationMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,9 @@ class ConsultationControllerTest {
     @Mock
     private ConsultationMapper consultationMapper;
 
+    @Mock
+    private ConsultationProducer  consultationProducer;
+
     @InjectMocks
     private ConsultationController consultationController;
 
@@ -57,6 +61,7 @@ class ConsultationControllerTest {
 
         verify(consultationMapper).toEntity(consultationRequest);
         verify(consultationService).create(consultation);
+        verify(consultationProducer).send(consultation);
         verify(consultationMapper).toResponse(consultation);
     }
 
@@ -74,6 +79,7 @@ class ConsultationControllerTest {
         );
         verify(consultationMapper).toEntity(consultationRequest);
         verify(consultationService).create(consultation);
+        verify(consultationProducer, never()).send(consultation);
     }
 
     @Test
@@ -93,6 +99,7 @@ class ConsultationControllerTest {
         assertThat(response.getBody().getDoctorId(), is(consultationResponse.getDoctorId()));
 
         verify(consultationService).update(id, updateRequest);
+        verify(consultationProducer).send(consultation);
         verify(consultationMapper).toResponse(consultation);
     }
 
@@ -110,6 +117,7 @@ class ConsultationControllerTest {
                 () -> consultationController.updateConsultation(id, updateRequest)
         );
         verify(consultationService).update(id, updateRequest);
+        verify(consultationProducer, never()).send(any());
     }
 
     @Test

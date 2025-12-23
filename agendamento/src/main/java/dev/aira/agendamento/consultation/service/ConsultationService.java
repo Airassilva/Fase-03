@@ -7,6 +7,7 @@ import dev.aira.agendamento.consultation.repositories.ConsultationRepository;
 import dev.aira.agendamento.consultation.validations.ConsultationCreateValidation;
 import dev.aira.agendamento.consultation.validations.ConsultationUpdateValidation;
 import dev.aira.agendamento.exceptions.ConsultationNotFoundException;
+import dev.aira.agendamento.message.ConsultationProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ConsultationService {
     private final ConsultationRepository consultationRepository;
+    private final ConsultationProducer  consultationProducer;
     private final List<ConsultationCreateValidation> consultationCreateValidations;
     private final List<ConsultationUpdateValidation> consultationUpdateValidation;
 
@@ -37,7 +39,9 @@ public class ConsultationService {
         Consultation consultation = consultationRepository.findById(consultationId)
                 .orElseThrow(ConsultationNotFoundException::new);
         consultation.updateStatus(status);
-        return consultationRepository.save(consultation);
+        Consultation consultationUpdated = consultationRepository.save(consultation);
+        consultationProducer.send(consultationUpdated);
+        return consultationUpdated;
     }
 
     public Consultation confirmConsultation(UUID consultationId){

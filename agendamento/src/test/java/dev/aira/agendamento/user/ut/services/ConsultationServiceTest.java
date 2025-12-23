@@ -8,6 +8,7 @@ import dev.aira.agendamento.consultation.service.ConsultationService;
 import dev.aira.agendamento.consultation.validations.ConsultationCreateValidation;
 import dev.aira.agendamento.consultation.validations.ConsultationUpdateValidation;
 import dev.aira.agendamento.exceptions.*;
+import dev.aira.agendamento.message.ConsultationProducer;
 import dev.aira.agendamento.objectMother.ConsultationMother;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class ConsultationServiceTest {
     @Mock
     private ConsultationUpdateValidation consultationUpdateValidation;
 
+    @Mock
+    private ConsultationProducer  consultationProducer;
+
     @InjectMocks
     private ConsultationService consultationService;
 
@@ -46,6 +50,7 @@ class ConsultationServiceTest {
     void setup() {
         consultationService = new ConsultationService(
                 consultationRepository,
+                consultationProducer,
                 List.of(consultationCreateValidation),
                 List.of(consultationUpdateValidation)
         );
@@ -163,6 +168,7 @@ class ConsultationServiceTest {
         assertThat(result, is(notNullValue()));
         assertThat(result.getDoctorId(), is(consultation.getDoctorId()));
         assertThat(result.getConsultationDate(), is(consultation.getConsultationDate()));
+
         verify(consultationUpdateValidation).validation(consultation);
         verify(consultationRepository).findById(consultationId);
         verify(consultationRepository).save(any(Consultation.class));
@@ -261,6 +267,9 @@ class ConsultationServiceTest {
 
         assertThat(result, is(consultation));
         assertThat(consultation.getStatus(), is(ConsultationStatus.AGENDADA));
+
+        verify(consultationRepository).findById(consultationId);
+        verify(consultationProducer).send(consultation);
     }
 
     @Test
@@ -274,6 +283,9 @@ class ConsultationServiceTest {
 
         assertThat(result, is(consultation));
         assertThat(consultation.getStatus(), is(ConsultationStatus.CANCELADA));
+
+        verify(consultationRepository).findById(consultationId);
+        verify(consultationProducer).send(consultation);
     }
 
     @Test
@@ -288,6 +300,9 @@ class ConsultationServiceTest {
 
         assertThat(result, is(consultation));
         assertThat(consultation.getStatus(), is(ConsultationStatus.FINALIZADA));
+
+        verify(consultationRepository).findById(consultationId);
+        verify(consultationProducer).send(consultation);
     }
 
     @Test
@@ -303,6 +318,7 @@ class ConsultationServiceTest {
         );
         verify(consultationRepository).findById(consultationId);
         verify(consultationRepository, never()).save(any());
+        verify(consultationProducer, never()).send(any());
     }
 
     @Test
@@ -318,6 +334,7 @@ class ConsultationServiceTest {
         );
         verify(consultationRepository).findById(consultationId);
         verify(consultationRepository, never()).save(any());
+        verify(consultationProducer, never()).send(any());
     }
 
     @Test
@@ -333,6 +350,7 @@ class ConsultationServiceTest {
         );
         verify(consultationRepository).findById(consultationId);
         verify(consultationRepository, never()).save(any());
+        verify(consultationProducer, never()).send(any());
     }
 
 }
