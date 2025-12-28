@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package consultation;
 
-option java_package = "dev.aira.agendamento.consultation";
+option java_package = "dev.aira.agendamento";
 option java_outer_classname = "ConsultationEvents";
 
 message ConsultationCreated {

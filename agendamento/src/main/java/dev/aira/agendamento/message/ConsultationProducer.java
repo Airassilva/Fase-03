@@ -1,6 +1,6 @@
 package dev.aira.agendamento.message;
 
-import dev.aira.agendamento.consultation.ConsultationEvents;
+import dev.aira.agendamento.ConsultationEvents;
 import dev.aira.agendamento.consultation.entities.Consultation;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
