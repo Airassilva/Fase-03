@@ -24,6 +24,7 @@ public class UserService {
 
     public User create(User user) {
         userCreateValidation.forEach(v -> v.validation(user));
+        user.addId();
         return userRepository.save(user);
     }
 

@@ -49,6 +49,10 @@ public class Consultation {
     @LastModifiedDate
     private LocalDateTime updatedDate;
 
+    public void addId(){
+        this.id = UUID.randomUUID();
+    }
+
     public void updateStatus(ConsultationStatus status) {
         this.status = status;
     }

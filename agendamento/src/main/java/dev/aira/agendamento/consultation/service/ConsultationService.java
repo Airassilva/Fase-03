@@ -24,6 +24,7 @@ public class ConsultationService {
 
     public Consultation create(Consultation consultation){
         consultationCreateValidations.forEach(v -> v.validation(consultation));
+        consultation.addId();
         consultation.updateStatus(ConsultationStatus.PENDENTE);
         return consultationRepository.save(consultation);
     }
