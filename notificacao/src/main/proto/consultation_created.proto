@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package consultation;
+
+option java_package = "dev.aira.notificacao";
+option java_outer_classname = "ConsultationEvents";
+
+message ConsultationCreated {
+  string consultation_id = 1;
+  string user_id = 2;
+  string consultation_date = 3;
+  string consultation_status = 4;
+}
