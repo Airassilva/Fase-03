@@ -21,7 +21,7 @@ public class CreateConsultationDoctorAvailabilityValidation implements Consultat
         LocalDateTime end = start.plusMinutes(CONSULTATION_DURATION_MINUTES);
 
         boolean doctorHasConflict =
-                consultationRepository.existsDoctorConflict(consultation.getDoctorId(), start, end);
+                consultationRepository.existsByDoctorIdAndConsultationDateBetween(consultation.getDoctorId(), start, end);
 
         if (doctorHasConflict) {
             throw new DoctorUnavailableBusinessException();

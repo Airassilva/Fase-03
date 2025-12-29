@@ -40,7 +40,7 @@ class CreateConsultationDoctorAvailabilityValidationTest {
         LocalDateTime end = start.plusMinutes(CONSULTATION_DURATION_MINUTES);
 
         when(consultationRepository
-                .existsDoctorConflict(consultation.getDoctorId(), start, end))
+                .existsByDoctorIdAndConsultationDateBetween(consultation.getDoctorId(), start, end))
                 .thenReturn(false);
 
         assertDoesNotThrow(
@@ -62,7 +62,7 @@ class CreateConsultationDoctorAvailabilityValidationTest {
         LocalDateTime end = start.plusMinutes(CONSULTATION_DURATION_MINUTES);
 
         when(consultationRepository
-                .existsDoctorConflict(consultation.getDoctorId(), start, end))
+                .existsByDoctorIdAndConsultationDateBetween(consultation.getDoctorId(), start, end))
                 .thenReturn(true);
 
         assertThrows(

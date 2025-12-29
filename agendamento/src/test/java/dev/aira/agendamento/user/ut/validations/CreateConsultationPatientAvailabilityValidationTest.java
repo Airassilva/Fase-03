@@ -40,7 +40,7 @@ class CreateConsultationPatientAvailabilityValidationTest {
         LocalDateTime end = start.plusMinutes(CONSULTATION_DURATION_MINUTES);
 
         when(consultationRepository
-                .existsPatientConflict(consultation.getPatientId(), start, end))
+                .existsByPatientIdAndConsultationDateBetween(consultation.getPatientId(), start, end))
                 .thenReturn(false);
 
         assertDoesNotThrow(
@@ -62,7 +62,7 @@ class CreateConsultationPatientAvailabilityValidationTest {
         LocalDateTime end = start.plusMinutes(CONSULTATION_DURATION_MINUTES);
 
         when(consultationRepository
-                .existsPatientConflict(consultation.getPatientId(), start, end))
+                .existsByPatientIdAndConsultationDateBetween(consultation.getPatientId(), start, end))
                 .thenReturn(true);
 
         assertThrows(

@@ -58,15 +58,15 @@ public class Consultation {
     }
 
     public void consultationUpdate(ConsultationUpdateRequest dto) {
-        if(dto.getDoctorId().equals(this.doctorId)){
+        if (dto.getDoctorId() != null && !dto.getDoctorId().equals(this.doctorId)) {
             this.doctorId = dto.getDoctorId();
         }
-        if(dto.getSpecialty().equals(this.specialty)){
+        if (dto.getSpecialty() != null && !dto.getSpecialty().equals(this.specialty)) {
             this.specialty = dto.getSpecialty();
         }
-       if(dto.getConsultationDate()!=null){
-           this.consultationDate = dto.getConsultationDate();
-       }
+        if (dto.getConsultationDate() != null && !dto.getConsultationDate().equals(this.consultationDate)) {
+            this.consultationDate = dto.getConsultationDate();
+        }
     }
 
     public Consultation(UUID doctorId, UUID patientId, LocalDateTime consultationDate, String specialty, String observation) {

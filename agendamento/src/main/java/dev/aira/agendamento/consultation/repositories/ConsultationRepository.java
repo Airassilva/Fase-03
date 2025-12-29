@@ -10,37 +10,22 @@ import java.util.UUID;
 
 @Repository
 public interface ConsultationRepository extends MongoRepository<Consultation, UUID> {
-    @Query("""
-            {
-              doctor_id: ?0,
-              consultationDate: {
-                $lt: ?2,
-                $gte: ?1
-              }
-            }
-            """)
-    boolean existsDoctorConflict(UUID doctorId, LocalDateTime start, LocalDateTime end);
+    boolean existsByDoctorIdAndConsultationDateBetween(
+            UUID doctorId,
+            LocalDateTime start,
+            LocalDateTime end
+    );
 
-    @Query("""
-            {
-              patient_id: ?0,
-              consultationDate: {
-                $lt: ?2,
-                $gte: ?1
-              }
-            }
-            """)
-    boolean existsPatientConflict(UUID patientId, LocalDateTime start, LocalDateTime end);
+    boolean existsByPatientIdAndConsultationDateBetween(
+            UUID patientId,
+            LocalDateTime start,
+            LocalDateTime end
+    );
 
-    @Query("""
-            {
-              doctorId: ?0,
-              consultationDate: {
-                $lt: ?2,
-                $gte: ?1
-              },
-              _id: { $ne: ?3 }
-            }
-           """)
-    boolean existsDoctorConflictExcludingConsultation(UUID doctorId, LocalDateTime start, LocalDateTime end, UUID consultationId);
+    boolean existsByDoctorIdAndConsultationDateBetweenAndIdNot(
+            UUID doctorId,
+            LocalDateTime start,
+            LocalDateTime end,
+            UUID consultationId
+    );
 }

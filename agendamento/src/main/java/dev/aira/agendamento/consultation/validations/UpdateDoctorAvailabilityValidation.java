@@ -20,7 +20,7 @@ public class UpdateDoctorAvailabilityValidation implements ConsultationUpdateVal
         LocalDateTime end = start.plusMinutes(60);
 
         boolean conflict =
-                consultationRepository.existsDoctorConflictExcludingConsultation(
+                consultationRepository.existsByDoctorIdAndConsultationDateBetweenAndIdNot(
                         consultation.getDoctorId(),
                         start,
                         end,

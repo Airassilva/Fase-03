@@ -39,7 +39,7 @@ class UpdateDoctorAvailabilityValidationTest {
         LocalDateTime start = consultation.getConsultationDate();
         LocalDateTime end = start.plusMinutes(CONSULTATION_DURATION_MINUTES);
 
-        when(consultationRepository.existsDoctorConflictExcludingConsultation
+        when(consultationRepository.existsByDoctorIdAndConsultationDateBetweenAndIdNot
                 (consultation.getDoctorId(),start,end,consultation.getId()))
                 .thenReturn(false);
 
@@ -61,7 +61,7 @@ class UpdateDoctorAvailabilityValidationTest {
         LocalDateTime start = consultation.getConsultationDate();
         LocalDateTime end = start.plusMinutes(CONSULTATION_DURATION_MINUTES);
 
-        when(consultationRepository.existsDoctorConflictExcludingConsultation
+        when(consultationRepository.existsByDoctorIdAndConsultationDateBetweenAndIdNot
                         (consultation.getDoctorId(), start, end, consultation.getId()))
                         .thenReturn(true);
 
