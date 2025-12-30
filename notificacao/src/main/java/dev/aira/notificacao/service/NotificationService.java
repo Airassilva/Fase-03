@@ -1,6 +1,7 @@
 package dev.aira.notificacao.service;
 
 import dev.aira.notificacao.ConsultationEvents.ConsultationCreated;
+import dev.aira.notificacao.dtos.DoctorDTO;
 import dev.aira.notificacao.dtos.ReminderEvent;
 import dev.aira.notificacao.dtos.UserDTO;
 import dev.aira.notificacao.enums.ConsultationStatus;
@@ -25,14 +26,17 @@ public class NotificationService {
     public void notifyByEmail(ConsultationCreated event) {
 
         UUID userId = UUID.fromString(event.getUserId());
+        UUID doctorID = UUID.fromString(event.getDoctorId());
+
         UserDTO patient = searchPatient(userId);
+        DoctorDTO doctor = searchDoctor(doctorID);
 
         if (patient.getEmail() == null) {
             throw new EmailUserNotFoundException(patient.getId());
         }
 
         String subject = "Atualização da sua consulta";
-        String body = assembleEmail(patient, event);
+        String body = assembleEmail(patient, doctor ,event);
 
         emailService.send(
                 patient.getEmail(),
@@ -106,13 +110,29 @@ public class NotificationService {
         );
     }
 
-    private String assembleEmail(UserDTO user, ConsultationCreated event) {
+    private DoctorDTO searchDoctor(UUID doctorId) {
+
+        var user = userClient.buscarPorId(doctorId);
+
+        if (user.getType() != UserType.MEDICO) {
+            throw new StatusUserNotFoundException(doctorId);
+        }
+
+        return new DoctorDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getType()
+        );
+    }
+
+    private String assembleEmail(UserDTO user,DoctorDTO doctor, ConsultationCreated event) {
         LocalDateTime consultationDate = LocalDateTime.parse(event.getConsultationDate());
         ConsultationStatus status = ConsultationStatus.valueOf(event.getConsultationStatus());
         return """
             Olá, %s!
 
-            Sua consulta no nosso consultório,
+            Sua consulta com o médico %s,
             agendada para %s,
             está com o status: %s.
 
@@ -120,6 +140,7 @@ public class NotificationService {
             Consultorio LTDA
             """.formatted(
                 user.getName(),
+                doctor.getName(),
                 consultationDate,
                 status
         );

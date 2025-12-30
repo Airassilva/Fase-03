@@ -19,6 +19,7 @@ public class ConsultationProducer {
                 ConsultationEvents.ConsultationCreated.newBuilder()
                         .setConsultationId(consultation.getId().toString())
                         .setUserId(consultation.getPatientId().toString())
+                        .setDoctorId(consultation.getDoctorId().toString())
                         .setConsultationDate(consultation.getConsultationDate().toString())
                         .setConsultationStatus(consultation.getStatus().toString())
                         .build()
