@@ -6,6 +6,7 @@ import dev.aira.notificacao.enums.ConsultationStatus;
 import dev.aira.notificacao.enums.ReminderType;
 import dev.aira.notificacao.repositories.ReminderRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,18 +14,19 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReminderService {
 
     private final ReminderRepository repository;
     private final ReminderCalculatorService calculator;
 
     public void createReminder(ConsultationCreated event) {
+        log.info("Evento recebido {}", event);
 
         ConsultationStatus status = ConsultationStatus.valueOf(event.getConsultationStatus());
         UUID userId = UUID.fromString(event.getUserId());
         UUID consultationId = UUID.fromString(event.getConsultationId());
         LocalDateTime consultationDate = LocalDateTime.parse(event.getConsultationDate());
-
 
         LocalDateTime schedule =
                 calculator.calcular(

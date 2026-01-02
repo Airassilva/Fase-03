@@ -17,7 +17,7 @@ import java.util.Map;
 @Configuration
 @EnableKafka
 public class KafkaConfig {
-    @Value("${spring.kafka.bootstrap-servers:kafka:9092}")
+    @Value("${spring.kafka.bootstrap-servers:kafka_2:29092}")
     private String bootstrapServers;
 
     @Bean
