@@ -1,0 +1,31 @@
+scalar DateTime
+
+type User {
+    id: ID!
+    name: String
+    email: String
+    userType: UserType
+}
+
+type Consultation {
+    id: ID!
+    date: DateTime!
+    status: ConsultationStatus!
+    patient: User!
+    doctor: User!
+}
+
+enum UserType {
+    PACIENTE
+    MEDICO
+    ENFERMEIRA
+}
+
+enum ConsultationStatus {
+    PENDENTE
+    CONFIRMADA
+    CANCELADA
+    REALIZADA
+}
+
+

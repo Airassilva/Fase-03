@@ -1,0 +1,17 @@
+type Query {
+    myConsultations(
+        status: ConsultationStatus
+        from: DateTime
+        to: DateTime
+        onlyFuture: Boolean = false
+    ): [Consultation!]!
+
+    patientConsultations(
+        patientId: ID!
+        status: ConsultationStatus
+        from: DateTime
+        to: DateTime
+        onlyFuture: Boolean
+    ): [Consultation!]!
+}
+

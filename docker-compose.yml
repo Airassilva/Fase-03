@@ -25,6 +25,27 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres_historico:
+    image: postgres:16
+    container_name: postgres_historico
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${HISTORICO_DB_NAME}
+      POSTGRES_USER: ${HISTORICO_DB_USERNAME}
+      POSTGRES_PASSWORD: ${HISTORICO_DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_historico_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${HISTORICO_DB_USERNAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   kafka:
     image: apache/kafka:4.1.1
     container_name: kafka_2
@@ -73,7 +94,7 @@ services:
     image: aira17/agendamento:latest
     container_name: agendamento-service
     ports:
-      - "8080:8080"
+      - "8080:8080"   #http
     env_file:
       - .env
     environment:
@@ -99,7 +120,7 @@ services:
     image: aira17/notificacao:latest
     container_name: notificacao-service
     ports:
-      - "5005:5005" #debug
+      - "5005:5005"   #debug
     env_file:
       - .env
     environment:
@@ -120,9 +141,37 @@ services:
     networks:
       - app-network
 
+  historico:
+    build:
+      context: ./historico
+      dockerfile: Dockerfile
+    image: aira17/historico:latest
+    container_name: historico-service
+    ports:
+      - "8081:8081"   #graphql
+      - "5006:5006"   #debug
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka_2:29092
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_historico:5432/${HISTORICO_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${HISTORICO_DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${HISTORICO_DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres_historico:
+        condition: service_healthy
+    networks:
+      - app-network
+
 volumes:
   mysql_data:
   kafka-data:
+  postgres_historico_data:
 
 networks:
   app-network:
