@@ -13,5 +13,12 @@ type Query {
         to: DateTime
         onlyFuture: Boolean
     ): [Consultation!]!
+
+    allConsultations(
+        status: ConsultationStatus
+        from: DateTime
+        to: DateTime
+        onlyFuture: Boolean = false
+    ): [Consultation!]!
 }
 

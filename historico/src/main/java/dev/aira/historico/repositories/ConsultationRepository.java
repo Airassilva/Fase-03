@@ -13,7 +13,7 @@ import java.util.UUID;
 @Repository
 public interface ConsultationRepository extends JpaRepository<Consultation, UUID> {
     @Query("""
-        select c from consultation c
+        select c from consultations c
         where c.patientId = :patientId
           and (:status is null or c.status = :status)
           and (:from is null or c.consultationDate >= :from)
@@ -21,4 +21,14 @@ public interface ConsultationRepository extends JpaRepository<Consultation, UUID
           and (:onlyFuture = false or c.consultationDate >= current_timestamp)
     """)
     List<Consultation> findPatientConsultations(UUID patientId, ConsultationStatus status, LocalDateTime from, LocalDateTime to, Boolean onlyFuture);
+
+    @Query("""
+    select c from consultations c
+    where (:status is null or c.status = :status)
+    and (:from is null or c.consultationDate >= :from)
+    and (:to is null or c.consultationDate <= :to)
+    and (:onlyFuture is null or :onlyFuture = false
+        or c.consultationDate >= current_timestamp)
+""")
+    List<Consultation> findAll(ConsultationStatus status, LocalDateTime from, LocalDateTime to, Boolean onlyFuture);
 }

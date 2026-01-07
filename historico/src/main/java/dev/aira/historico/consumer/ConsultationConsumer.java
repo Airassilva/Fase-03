@@ -34,6 +34,8 @@ public class ConsultationConsumer {
             throw new ConsultationConsumerException(
                     "Erro ao desserializar evento", e
             );
+        } catch (IllegalArgumentException e) {
+            log.warn("Evento inválido, descartando mensagem: {}", e.getMessage());
 
         } catch (Exception e) {
             throw new ConsultationConsumerException(

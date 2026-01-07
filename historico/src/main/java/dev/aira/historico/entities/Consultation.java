@@ -1,5 +1,6 @@
 package dev.aira.historico.entities;
 
+import dev.aira.historico.dtos.UpdateConsultationInputDTO;
 import dev.aira.historico.enums.ConsultationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "consultation")
+@Entity(name = "consultations")
 public class Consultation {
     @Id
     private UUID id;
@@ -29,4 +30,16 @@ public class Consultation {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ConsultationStatus status;
+
+    public boolean updateDate(LocalDateTime date) {
+        if(date.isBefore(consultationDate)) {
+            this.consultationDate = date;
+            return true;
+        }
+        return false;
+    }
+
+    public void updateDoctor(User doctor) {
+        this.doctorId = doctor.getId();
+    }
 }

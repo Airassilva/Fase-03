@@ -28,4 +28,15 @@ enum ConsultationStatus {
     REALIZADA
 }
 
+input UpdateConsultationInput {
+    consultationId: ID!
+    date: DateTime
+    doctorId: ID
+}
+
+type Mutation {
+    updateConsultation(
+        input: UpdateConsultationInput!
+    ): Consultation!
+}
 

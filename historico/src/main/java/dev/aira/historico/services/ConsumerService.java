@@ -13,15 +13,27 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ConsumerService {
-    private final ConsultationRepository  consultationRepository;
+    private final ConsultationRepository consultationRepository;
 
-    public void saveConsultation(ConsultationCreated event){
+    public void saveConsultation(ConsultationCreated event) {
+        UUID consultationId = UUID.fromString(event.getConsultationId());
+        UUID patientId = UUID.fromString(event.getUserId());
+        UUID doctorId = UUID.fromString(event.getDoctorId());
+        ConsultationStatus status;
+        try {
+            status = ConsultationStatus.valueOf(event.getConsultationStatus());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "Status inválido: " + event.getConsultationStatus()
+            );
+        }
+        LocalDateTime date = LocalDateTime.parse(event.getConsultationDate());
         Consultation consultation = new Consultation(
-                UUID.fromString(event.getConsultationId()),
-                UUID.fromString(event.getUserId()),
-                UUID.fromString(event.getDoctorId()),
-                LocalDateTime.parse(event.getConsultationDate()),
-                ConsultationStatus.valueOf(event.getConsultationStatus())
+                consultationId,
+                patientId,
+                doctorId,
+                date,
+                status
         );
         consultationRepository.save(consultation);
     }
