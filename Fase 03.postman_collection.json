@@ -1,0 +1,622 @@
+{
+	"info": {
+		"_postman_id": "df50f05e-5179-47c6-95f9-e2bae96616d2",
+		"name": "Fase 03",
+		"description": "# 📌 Sistema de Agendamento, Histórico e Notificação\n\nEste projeto é um **ecossistema de microserviços** desenvolvido em **Java 21 com Spring Boot 4**, focado em **agendamento de consultas**, **histórico clínico** e **notificações**, utilizando **arquitetura moderna, segurança com JWT e comunicação assíncrona via Kafka**.\n\n---\n\n## 🧩 Visão Geral da Arquitetura\n\nO sistema é composto por três microserviços principais:\n\n### 🟢 1. Agendamento Service\n\nResponsável por:\n\n- Cadastro e autenticação de usuários\n    \n- Criação e edição de consultas\n    \n- Login com **Spring Security + JWT**\n    \n- Emissão de tokens JWT\n    \n- Publicação de eventos de consulta no Kafka\n    \n\n### 🔵 2. Histórico Service\n\nResponsável por:\n\n- Consumir eventos do kafka\n    \n- Manter o histórico de consultas\n    \n- Expor consultas via **GraphQL**\n    \n- Proteger acessos com **JWT Resource Server**\n    \n- Validar permissões por perfil (roles)\n    \n\n### 🟣 3. Notificação Service\n\nResponsável por:\n\n- Consumir eventos do Kafka\n    \n- Enviar notificações (email)\n    \n- Persistir dados relacionados a notificações\n    \n\n---\n\n## 🔐 Segurança\n\n### 🔑 Autenticação\n\n- Baseada em **Spring Security**\n    \n- Login realizado via `AuthenticationManager`\n    \n- Usuário implementa `UserDetails`\n    \n- Estado do usuário (`ativo/inativo`) controlado por `isEnabled()`\n    \n\n### 🎟️ JWT\n\n- Tokens assinados com **RSA (chave pública/privada)**\n    \n- Claims principais:\n    \n    - `sub`: id do usuário\n        \n    - `roles`: autoridades do usuário\n        \n    - `iss`: `Agendamento-service`\n        \n\n#### Exemplo de geração de token\n\n``` java\nJwtClaimsSet.builder()\n  .issuer(\"Agendamento-service\")\n  .subject(user.getId().toString())\n  .claim(\"roles\", user.getAuthorities())\n  .issuedAt(now)\n  .expiresAt(now.plusSeconds(300))\n  .build();\n\n ```\n\n### ✅ Validação automática do token\n\n- O `JwtDecoder` valida:\n    \n    - Assinatura (chave pública)\n        \n    - Expiração\n        \n    - Issuer (`Agendamento-service`)\n        \n\n---\n\n## 👥 Regras de Acesso (Histórico)\n\n| Perfil | Permissões |\n| --- | --- |\n| **Médico** | Visualizar e editar histórico de consultas |\n| **Enfermeiro** | Cria consultas e visualiza histórico |\n| **Paciente** | Visualizar apenas suas próprias consultas |\n\nAs regras são aplicadas via:\n\n- `@PreAuthorize`\n    \n- Claims do JWT\n    \n- `Authentication.getPrincipal()`\n    \n\n---\n\n## 📡 Comunicação entre Serviços\n\n### Kafka\n\n- Utilizado para comunicação assíncrona\n    \n- Exemplo de evento:\n    \n    - `consultation-notification`\n        \n\n---\n\n## 🧪 Testes\n\n### Login\n\n- Testes unitários simulam autenticação\n    \n- `AuthenticationManager` mockado\n    \n- TokenService mockado\n    \n\n### Segurança\n\n- Testes de acesso por role\n    \n- JWT real testado via Postman\n    \n\n---\n\n## 🧪 Testando com Postman\n\n1. Faça login no **Agendamento Service**\n    \n2. Copie o `accessToken`\n    \n3. No request protegido:\n    \n\n```\nAuthorization: Bearer <token>\n\n ```\n\n### GraphQL (Histórico Service)\n\nEndpoint:\n\n```\nPOST /graphql\n\n ```\n\nBody:\n\n``` json\n{\n  \"query\": \"{ consultations { id date status } }\"\n}\n\n ```\n\n---\n\n## 🐳 Docker\n\n- Cada serviço roda em container próprio\n    \n- Kafka configurado com `advertised.listeners`\n    \n- Comunicação interna via nome do container\n    \n\n---\n\n## 📦 Tecnologias Utilizadas\n\n- Java 21\n    \n- Spring Boot 4.0.1\n    \n- Spring Security\n    \n- OAuth2 Resource Server\n    \n- JWT (Nimbus)\n    \n- GraphQL\n    \n- Kafka\n    \n- Docker / Docker Compose\n    \n- MySQL\n    \n- JPA / Hibernate\n    \n- Lombok\n    \n- OpenFeign\n    \n\n---\n\n## 🎯 Status do Projeto\n\n✔ Arquitetura definida  \n✔ Segurança implementada  \n✔ Comunicação entre serviços funcional  \n✔ Kafka operacional\n\n---\n\n## 👩‍💻 Autora\n\n**Aira Soares**\n\nProjeto acadêmico e profissional com foco em **arquitetura, segurança e boas práticas em sistemas distribuídos**.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "47331437",
+		"_collection_link": "https://airassilva-02673a54-1209831.postman.co/workspace/99e162d7-0acb-4391-85fa-2816592cb207/collection/47331437-df50f05e-5179-47c6-95f9-e2bae96616d2?action=share&source=collection_link&creator=47331437"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "happy path",
+					"item": [
+						{
+							"name": "Criar usuario",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Aira Soares\",\r\n  \"email\": \"airasoares@gmail.com\", //recomenda-se colocar um email existente para um userType PACIENTE para receber o email \r\n  \"password\": \"senhaSegura123\",\r\n  \"userType\": \"MEDICO\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{baseURL}}/users"
+							},
+							"response": []
+						},
+						{
+							"name": "Login",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": ""
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\":\"airasoares16@gmail.com\",\r\n    \"password\":\"senhaSegura123\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{baseURL}}/users/login"
+							},
+							"response": []
+						},
+						{
+							"name": "Listar usuário pelo ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{baseURL}}/users/b310c8ee-a78c-40fd-ab66-72b45ea31a7d"
+							},
+							"response": []
+						},
+						{
+							"name": "Listar todos os usuários",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{baseURL}}/users"
+							},
+							"response": []
+						},
+						{
+							"name": "Update usuário",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"airasoares11@gmail.com\",\r\n    \"password\": \"senhaSegura1234\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{baseURL}}/users/b310c8ee-a78c-40fd-ab66-72b45ea31a7d"
+							},
+							"response": []
+						},
+						{
+							"name": "Desativar usuário",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"airasoares11@gmail.com\",\r\n    \"password\": \"senhaSegura1234\"\r\n}"
+								},
+								"url": "{{baseURL}}/users/b310c8ee-a78c-40fd-ab66-72b45ea31a7d/deactivate"
+							},
+							"response": []
+						},
+						{
+							"name": "Ativar usuário",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"airasoares11@gmail.com\",\r\n    \"password\": \"senhaSegura1234\"\r\n}"
+								},
+								"url": "{{baseURL}}/users/b310c8ee-a78c-40fd-ab66-72b45ea31a7d/activate"
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar usuário",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"airasoares11@gmail.com\",\r\n    \"password\": \"senhaSegura1234\"\r\n}"
+								},
+								"url": "{{baseURL}}/users/b310c8ee-a78c-40fd-ab66-72b45ea31a7d"
+							},
+							"response": []
+						}
+					],
+					"description": "caminho feliz",
+					"auth": {
+						"type": "bearer",
+						"bearer": {
+							"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiYzU0YWMxNTctZjhmZi00NjcxLWJmYTUtNzk1YWUzNzdlOTkwIiwiZXhwIjoxNzY3OTY5Njk0LCJpYXQiOjE3Njc5NjkzOTQsInJvbGVzIjpbIlJPTEVfUEFDSUVOVEUiXX0.kWiu6807qhKczuPbZF0RmV1voidV4lQrqQygd-poA4svoZfbGeM5j5AbT80H0wNEaYMAhUiXcwUFCTDdtOhp8dfRxgrVAJkyvntMFPJ9Ce52kcMq3R_22D5czWG4BKdKBFV8-Vk9JLO7eOkTyP3qEdbKUO5nHSeHSaHU99i1r9pCoxhtiFA3FhSwb6kbGOiOb07nvByLgbiBIrfkzImjCRCuAt6DEdRF-vabA6pDjjKP21lPYQ47oqxdsRSiyerkQLIYXGReTXidpzaJYohB9leMp1ANZVfJNK6LIQjT_gHNGfjiVFr_9U_8UwIHxS7wvy99vgG45M1i1M63ABQJRg"
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "sad path",
+					"item": [
+						{
+							"name": "Criar usuario",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Aira Soares\",\r\n  \"email\": \"airasoares\",\r\n  \"password\": \"senhaSegura123\",\r\n  \"userType\": \"MEDICO\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{baseURL}}/users"
+							},
+							"response": []
+						},
+						{
+							"name": "Login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\":\"airasoares2@gmail.com\",\r\n    \"password\":\"senhaSegura\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{baseURL}}/users/login"
+							},
+							"response": []
+						},
+						{
+							"name": "Listar usuário pelo ID",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"airasoares11@gmail.com\",\r\n    \"password\": \"senhaSegura1234\"\r\n}"
+								},
+								"url": "{{baseURL}}/users/b310c8ee-a78c-40fd-ab66-72b45ea31a7d"
+							},
+							"response": []
+						},
+						{
+							"name": "Listar todos os usuários",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{baseURL}}/users/size=99999"
+							},
+							"response": []
+						},
+						{
+							"name": "Update usuário",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"airasoares\",\r\n    \"password\": \"senhaSegura1234\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{baseURL}}/users/b310c8ee-a78c-40fd-ab66-72b45ea31a7d"
+							},
+							"response": []
+						},
+						{
+							"name": "Desativar usuário",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"airasoares11@gmail.com\",\r\n    \"password\": \"senhaSegura1234\"\r\n}"
+								},
+								"url": "{{baseURL}}/users/b310c8ee-a78c-40fd-ab66-72b45ea31a7d/desactivate"
+							},
+							"response": []
+						},
+						{
+							"name": "Ativar usuário",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"airasoares11@gmail.com\",\r\n    \"password\": \"senhaSegura1234\"\r\n}"
+								},
+								"url": "{{baseURL}}/users/b310c8ee-a78c-40fd-ab66-72b45ea31a7d/activateuser"
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar usuário",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{baseURL}}/users/b310c8ee-a78c-40fd-ab66-72b45ea31a7d/delete"
+							},
+							"response": []
+						}
+					],
+					"description": "Caminho triste"
+				}
+			],
+			"description": "Serviço de criação de usuários e logins"
+		},
+		{
+			"name": "Consultations",
+			"item": [
+				{
+					"name": "happy path",
+					"item": [
+						{
+							"name": "Criar consulta",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"doctorId\":\"231e2dd1-7951-4e86-9e9e-3b673a2a46d5\",\r\n    \"patientId\":\"f118b337-ee84-441d-814b-ba16dfb3761d\",\r\n    \"consultationDate\":\"2026-02-20T14:00:00\",\r\n    \"specialty\":\"Dermatology\",\r\n    \"observation\":\"skin disease\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{baseURL}}/consultations"
+							},
+							"response": []
+						},
+						{
+							"name": "Update consulta",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"specialty\":\"Cardiology\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{baseURL}}/consultations/e6fc10a9-d9c9-42d9-a1fd-a774f9cb224f"
+							},
+							"response": []
+						},
+						{
+							"name": "confirmar consulta",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": "{{baseURL}}/consultations/e6fc10a9-d9c9-42d9-a1fd-a774f9cb224f/confirm"
+							},
+							"response": []
+						},
+						{
+							"name": "finalizar consulta",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": "{{baseURL}}/consultations/e6fc10a9-d9c9-42d9-a1fd-a774f9cb224f/finish"
+							},
+							"response": []
+						},
+						{
+							"name": "cancelar consulta",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": "{{baseURL}}/consultations/e6fc10a9-d9c9-42d9-a1fd-a774f9cb224f/cancel"
+							},
+							"response": []
+						}
+					],
+					"description": "Caminho feliz"
+				},
+				{
+					"name": "sad path",
+					"item": [
+						{
+							"name": "Criar consulta",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiNzJjYTE0ZjctNjg5Mi00ZWM3LTlkZmYtMDZhNDI4NmRlMThiIiwiZXhwIjoxNzY3OTI1NTU5LCJpYXQiOjE3Njc5MjUyNTksInJvbGVzIjpbIlJPTEVfTUVESUNPIl19.lMjSlSxBFvPCI22vtNFUl6bIP0HAf9jw9lYGHeQyXYbpq2VRjqiKis8c7GMtNyx6g86LPIABLfOA66QLs18_Y7luXpKZqgmXw4vOnAiOr4LcLiKCTG2q3cFV8VQ7l8YJSmbygholEYcKrkwryuBz34fMvqmxgkMLVJ8U562vjx-vPHugbii3sW5r-jEgXs3TtxuKuinn1eTotVbC0bb3Ra4L0MHL-9pNgyRKTtYnBRdKcgk5DHDkknKXoKfD1VYmJEyrfTNeMpPBOhbbxnUHZTE0qjebYRv-vsKgwELT9fczCmgU1OhUPdGGs3TFzppZo0q7HRCLQcJETiPSPfauUw"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"doctorId\":\"231e2dd1-7951-4e86-9e9e-3b673a2a46d5\",\r\n    \"patientId\":\"f118b337-ee84-441d-814b-ba16dfb3761d\",\r\n    \"consultationDate\":\"2026-02-20T14:30:00\",\r\n    \"specialty\":\"Dermatology\",\r\n    \"observation\":\"skin disease\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{baseURL}}/consultations"
+							},
+							"response": []
+						},
+						{
+							"name": "Update consulta",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiNzJjYTE0ZjctNjg5Mi00ZWM3LTlkZmYtMDZhNDI4NmRlMThiIiwiZXhwIjoxNzY3OTI1NTU5LCJpYXQiOjE3Njc5MjUyNTksInJvbGVzIjpbIlJPTEVfTUVESUNPIl19.lMjSlSxBFvPCI22vtNFUl6bIP0HAf9jw9lYGHeQyXYbpq2VRjqiKis8c7GMtNyx6g86LPIABLfOA66QLs18_Y7luXpKZqgmXw4vOnAiOr4LcLiKCTG2q3cFV8VQ7l8YJSmbygholEYcKrkwryuBz34fMvqmxgkMLVJ8U562vjx-vPHugbii3sW5r-jEgXs3TtxuKuinn1eTotVbC0bb3Ra4L0MHL-9pNgyRKTtYnBRdKcgk5DHDkknKXoKfD1VYmJEyrfTNeMpPBOhbbxnUHZTE0qjebYRv-vsKgwELT9fczCmgU1OhUPdGGs3TFzppZo0q7HRCLQcJETiPSPfauUw"
+									}
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"specialty\":\"Cardiology\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{baseURL}}/consultations/e6fc10a9-d9c9-42d9-a1fd-a774f9c"
+							},
+							"response": []
+						},
+						{
+							"name": "confirmar consulta",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiNzJjYTE0ZjctNjg5Mi00ZWM3LTlkZmYtMDZhNDI4NmRlMThiIiwiZXhwIjoxNzY3OTI1NTU5LCJpYXQiOjE3Njc5MjUyNTksInJvbGVzIjpbIlJPTEVfTUVESUNPIl19.lMjSlSxBFvPCI22vtNFUl6bIP0HAf9jw9lYGHeQyXYbpq2VRjqiKis8c7GMtNyx6g86LPIABLfOA66QLs18_Y7luXpKZqgmXw4vOnAiOr4LcLiKCTG2q3cFV8VQ7l8YJSmbygholEYcKrkwryuBz34fMvqmxgkMLVJ8U562vjx-vPHugbii3sW5r-jEgXs3TtxuKuinn1eTotVbC0bb3Ra4L0MHL-9pNgyRKTtYnBRdKcgk5DHDkknKXoKfD1VYmJEyrfTNeMpPBOhbbxnUHZTE0qjebYRv-vsKgwELT9fczCmgU1OhUPdGGs3TFzppZo0q7HRCLQcJETiPSPfauUw"
+									}
+								},
+								"method": "PATCH",
+								"header": [],
+								"url": "{{baseURL}}/consultations/e6fc10a9-d9c9-42d9-a1fd-a774f9cb2/confirm"
+							},
+							"response": []
+						},
+						{
+							"name": "finalizar consulta",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiNzJjYTE0ZjctNjg5Mi00ZWM3LTlkZmYtMDZhNDI4NmRlMThiIiwiZXhwIjoxNzY3OTI1NTU5LCJpYXQiOjE3Njc5MjUyNTksInJvbGVzIjpbIlJPTEVfTUVESUNPIl19.lMjSlSxBFvPCI22vtNFUl6bIP0HAf9jw9lYGHeQyXYbpq2VRjqiKis8c7GMtNyx6g86LPIABLfOA66QLs18_Y7luXpKZqgmXw4vOnAiOr4LcLiKCTG2q3cFV8VQ7l8YJSmbygholEYcKrkwryuBz34fMvqmxgkMLVJ8U562vjx-vPHugbii3sW5r-jEgXs3TtxuKuinn1eTotVbC0bb3Ra4L0MHL-9pNgyRKTtYnBRdKcgk5DHDkknKXoKfD1VYmJEyrfTNeMpPBOhbbxnUHZTE0qjebYRv-vsKgwELT9fczCmgU1OhUPdGGs3TFzppZo0q7HRCLQcJETiPSPfauUw"
+									}
+								},
+								"method": "PATCH",
+								"header": [],
+								"url": "{{baseURL}}/consultations/e6fc10a9-d9c9-42d9-a1fd-a774f9cb224f/finishe"
+							},
+							"response": []
+						},
+						{
+							"name": "cancelar consulta",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiNzJjYTE0ZjctNjg5Mi00ZWM3LTlkZmYtMDZhNDI4NmRlMThiIiwiZXhwIjoxNzY3OTI1NTU5LCJpYXQiOjE3Njc5MjUyNTksInJvbGVzIjpbIlJPTEVfTUVESUNPIl19.lMjSlSxBFvPCI22vtNFUl6bIP0HAf9jw9lYGHeQyXYbpq2VRjqiKis8c7GMtNyx6g86LPIABLfOA66QLs18_Y7luXpKZqgmXw4vOnAiOr4LcLiKCTG2q3cFV8VQ7l8YJSmbygholEYcKrkwryuBz34fMvqmxgkMLVJ8U562vjx-vPHugbii3sW5r-jEgXs3TtxuKuinn1eTotVbC0bb3Ra4L0MHL-9pNgyRKTtYnBRdKcgk5DHDkknKXoKfD1VYmJEyrfTNeMpPBOhbbxnUHZTE0qjebYRv-vsKgwELT9fczCmgU1OhUPdGGs3TFzppZo0q7HRCLQcJETiPSPfauUw"
+									}
+								},
+								"method": "PATCH",
+								"header": [],
+								"url": "{{baseURL}}/consultations/e6fc10a9-d9c9-42d9-a1fd-a774f9cb224f/cancelada"
+							},
+							"response": []
+						}
+					],
+					"description": "Caminho triste"
+				}
+			],
+			"description": "Serviço de criação de consultas"
+		},
+		{
+			"name": "Historico",
+			"item": [
+				{
+					"name": "happy path",
+					"item": [
+						{
+							"name": "MyConsultations",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiYzU0YWMxNTctZjhmZi00NjcxLWJmYTUtNzk1YWUzNzdlOTkwIiwiZXhwIjoxNzY3OTkzODg0LCJpYXQiOjE3Njc5OTM1ODQsInJvbGVzIjpbIlJPTEVfUEFDSUVOVEUiXX0.BFMcMkGrXapdXPRLbvyoI78pciCTObDUW9kPhYQBnE8-6-apIPRl2FLz5eaVoDtruK3USD9Cej3d9r5pE_3z3XnOZgOQ4twe488mghNpiggjGz74U3xPPo3DLStD5we-wPHg07VyGtLHOuPUJjZviosYQLz5PppB6GqGsxiLO-KMamFiDpZWeOpT7Rx62ujXnYuxTd6QzC4qRkOiP8iMZl8KJH4DKAtKfflNSCNAlcwT1aNFWvuQB2ygcZn2ttIzy-Li7nV4aOSlx5ncnAP4I3IoqtSmaFBbiqhzUKNdFKPYaZVldNl5A-3gcm8NfYuPkbufdjpveX8XmS_dAMvfQQ"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query MyConsultations(\r\n  $status: ConsultationStatus\r\n  $from: String\r\n  $to: String\r\n  $onlyFuture: Boolean\r\n) {\r\n  myConsultations(\r\n    status: $status\r\n    from: $from\r\n    to: $to\r\n    onlyFuture: $onlyFuture\r\n  ) {\r\n    id\r\n    status\r\n    date\r\n    patient {\r\n      id\r\n      name\r\n    }\r\n    doctor {\r\n      id\r\n      name\r\n    }\r\n  }\r\n}\r\n",
+										"variables": "{\r\n  \"status\": \"PENDENTE\",\r\n  \"from\": \"2026-01-01T00:00:00\",\r\n  \"to\": \"2026-01-31T23:59:59\",\r\n  \"onlyFuture\": false\r\n}\r\n"
+									}
+								},
+								"url": "{{baseURL2}}"
+							},
+							"response": []
+						},
+						{
+							"name": "PatientConsultations",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiNzJjYTE0ZjctNjg5Mi00ZWM3LTlkZmYtMDZhNDI4NmRlMThiIiwiZXhwIjoxNzY3OTk3MTA1LCJpYXQiOjE3Njc5OTY4MDUsInJvbGVzIjpbIlJPTEVfTUVESUNPIl19.cwfDtF9bLqWkGJJYZ7mkEI6a3Lg0xjw3EtGa1xbtcU3vIih1nwgPTo4iyI-Mb7GcT9tYO_ymBb2vLsp2qx-YmM7YCgZtobiS-1k6RFeEjRk4Q0LURoTaV61sTe_zt6B4mJO7RlCqpSaxttf57zOhy8pc7jCBMtiZDalSwuxz8Fgk_tbCNoZdFphCXfifLgLjuOF3v42Lz4QZ6zdt0Ccf-RY9OFe8X613kmrAj7ek0Dx4ISqI9g0LWEwub7EjgSONoPNeT0iUSWEi2xVO8tLvLfrNrMCcO4Sa-X1jwojta4Wap_lwHBOZWA8ut-PgSfQGkpxjzkC1MuXDg31MW9p0fQ"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query PatientConsultations(\r\n  $patientId: ID!\r\n  $status: ConsultationStatus\r\n  $from: String\r\n  $to: String\r\n  $onlyFuture: Boolean\r\n) {\r\n  patientConsultations(\r\n    patientId: $patientId\r\n    status: $status\r\n    from: $from\r\n    to: $to\r\n    onlyFuture: $onlyFuture\r\n  ) {\r\n    id\r\n    status\r\n    date\r\n    patient {\r\n      id\r\n      name\r\n    }\r\n    doctor {\r\n      id\r\n      name\r\n    }\r\n  }\r\n}\r\n",
+										"variables": "{\r\n  \"patientId\":\"c54ac157-f8ff-4671-bfa5-795ae377e990\",\r\n  \"status\": \"PENDENTE\",\r\n  \"from\": \"2026-01-01T00:00:00\",\r\n  \"to\": \"2026-01-31T23:59:59\",\r\n  \"onlyFuture\": false\r\n}\r\n"
+									}
+								},
+								"url": "{{baseURL2}}"
+							},
+							"response": []
+						},
+						{
+							"name": "AllConsultations",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiNzJjYTE0ZjctNjg5Mi00ZWM3LTlkZmYtMDZhNDI4NmRlMThiIiwiZXhwIjoxNzY3OTk3MTA1LCJpYXQiOjE3Njc5OTY4MDUsInJvbGVzIjpbIlJPTEVfTUVESUNPIl19.cwfDtF9bLqWkGJJYZ7mkEI6a3Lg0xjw3EtGa1xbtcU3vIih1nwgPTo4iyI-Mb7GcT9tYO_ymBb2vLsp2qx-YmM7YCgZtobiS-1k6RFeEjRk4Q0LURoTaV61sTe_zt6B4mJO7RlCqpSaxttf57zOhy8pc7jCBMtiZDalSwuxz8Fgk_tbCNoZdFphCXfifLgLjuOF3v42Lz4QZ6zdt0Ccf-RY9OFe8X613kmrAj7ek0Dx4ISqI9g0LWEwub7EjgSONoPNeT0iUSWEi2xVO8tLvLfrNrMCcO4Sa-X1jwojta4Wap_lwHBOZWA8ut-PgSfQGkpxjzkC1MuXDg31MW9p0fQ"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query AllConsultations(\r\n  $status: ConsultationStatus\r\n  $from: String\r\n  $to: String\r\n  $onlyFuture: Boolean\r\n) {\r\n  allConsultations(\r\n    status: $status\r\n    from: $from\r\n    to: $to\r\n    onlyFuture: $onlyFuture\r\n  ) {\r\n    id\r\n    status\r\n    date\r\n    patient {\r\n      id\r\n      name\r\n    }\r\n    doctor {\r\n      id\r\n      name\r\n    }\r\n  }\r\n}\r\n",
+										"variables": "{\r\n  \"status\": \"PENDENTE\",\r\n  \"from\": \"2026-01-01T00:00:00\",\r\n  \"to\": \"2026-01-31T23:59:59\",\r\n  \"onlyFuture\": true\r\n}\r\n\r\n"
+									}
+								},
+								"url": "{{baseURL2}}"
+							},
+							"response": []
+						},
+						{
+							"name": "UpdateConsultation",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiYzU0YWMxNTctZjhmZi00NjcxLWJmYTUtNzk1YWUzNzdlOTkwIiwiZXhwIjoxNzY3OTk0MzQxLCJpYXQiOjE3Njc5OTQwNDEsInJvbGVzIjpbIlJPTEVfUEFDSUVOVEUiXX0.Dq6RzyIa73OS5GDkFFHcwIcbFJm6iepTmu4ZXEjnLeDwRz8xz2E4p5g3toqLWklaKcxGFrcdAsBpOT4Hn2XGV6wq4vca0rtLOTs4A5Jzp3AHvueU-4elY0a0ew-dkbV3_0QOUnEsoR2f77Khoekmn2uAQC6rYfPMJYbMK4rxPkEpY-NsEA7xQ29u_Oo4a9QFQDpnkuWLPcv3ifd3nGAUqNc__wcplRiCVtAM96pxMoHpI3D8aYYlznz9TDpy0dXT3-bN7wY5f4JcSMWTF3vHg2qnoB0QB57W2Qu7kH0Ri_3UQdWgnmVYzx3k4voTXQmk8itOlGp16wmBBD3rL5Vx8w"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation UpdateConsultation(\r\n  $input: UpdateConsultationInput!\r\n) {\r\n  updateConsultation(input: $input) {\r\n    id\r\n    status\r\n    date\r\n    doctor {\r\n      id\r\n      name\r\n    }\r\n  }\r\n}\r\n\r\n",
+										"variables": "{\r\n  \"input\": {\r\n    \"consultationId\":\"37fead03-f156-40c8-b42d-fc1ca61d788a\",\r\n    \"date\": \"2026-02-10T14:00:00\",\r\n    \"doctorId\":\"72ca14f7-6892-4ec7-9dff-06a4286de18b\"\r\n  }\r\n}\r\n\r\n"
+									}
+								},
+								"url": "{{baseURL2}}"
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"description": "Hitorico de consultas com GraphQL",
+			"auth": {
+				"type": "bearer",
+				"bearer": {}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJBZ2VuZGFtZW50by1zZXJ2aWNlIiwic3ViIjoiYzU0YWMxNTctZjhmZi00NjcxLWJmYTUtNzk1YWUzNzdlOTkwIiwiZXhwIjoxNzY3OTgwMTg0LCJpYXQiOjE3Njc5Nzk4ODQsInJvbGVzIjpbIlJPTEVfUEFDSUVOVEUiXX0.W4OFk1i3FXTV9v5MhUlXn_3ZsUP9vrCdk87e0Oy888YkL4YSPCt_KTTdXYAOpKIXYr4S3yF3aMXYSka1AelhwfNPiz7_pmBy9kr7LmOlyUTHggZjZ_knorR6zqIMNW5swURwSp_o7WJ8aHHAv8Ja307o8SaoowDh0ZLnU4BpZIHhTJyAuVyK_8lPsIdjrd_4eE3ffRDxYeiXbWGeBA0-PMg3aSCMnbP05_xVMZFchyc4wG1RXzowbp8xRZMhfvSVpSXXsAxCv_rhP9oMIuStAIrxszZlF2VBtfdndA1IUM5dcAdlqc8CteFLBIDxiP9rwnGxoCQWXsDAX17shND9ng"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
