@@ -1,5 +1,3 @@
-scalar DateTime
-
 type User {
     id: ID!
     name: String
@@ -9,7 +7,7 @@ type User {
 
 type Consultation {
     id: ID!
-    date: DateTime!
+    date: String!
     status: ConsultationStatus!
     patient: User!
     doctor: User!
@@ -30,7 +28,7 @@ enum ConsultationStatus {
 
 input UpdateConsultationInput {
     consultationId: ID!
-    date: DateTime
+    date: String
     doctorId: ID
 }
 

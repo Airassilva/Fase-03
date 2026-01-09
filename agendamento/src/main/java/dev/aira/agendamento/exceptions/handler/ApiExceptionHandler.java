@@ -5,6 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -30,11 +33,25 @@ public class ApiExceptionHandler {
                 .body(new ApiError(e.getMessage()));
     }
 
-    @ExceptionHandler(UnauthorizedAccessBusinessException.class)
-    public ResponseEntity<ApiError> handleUnauthorizedAccessBusinessException(UnauthorizedAccessBusinessException e) {
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(new ApiError(e.getMessage()));
+                .body(new ApiError("Usuário ou senha inválidos"));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ApiError("Acesso negado: você não tem permissão para acessar este recurso"));
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiError> handleAuthorizationDenied(AuthorizationDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ApiError("Acesso negado: você não tem permissão para acessar este recurso"));
     }
 
     @ExceptionHandler(UnavailableBusinessException.class)

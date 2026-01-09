@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,21 +20,25 @@ public class ConsultationQueryController {
     private final ConsultationService  consultationService;
 
     @QueryMapping
-    public List<ConsultationDTO> myConsultations(@Argument ConsultationStatus status, @Argument LocalDateTime from, @Argument LocalDateTime to, @Argument Boolean onlyFuture) {
+    @PreAuthorize("hasRole('PACIENTE')")
+    public List<ConsultationDTO> myConsultations(@Argument ConsultationStatus status, @Argument String from, @Argument String to, @Argument Boolean onlyFuture) {
         return consultationService.myConsultations(status, from, to, onlyFuture);
     }
 
     @QueryMapping
-    public List<ConsultationDTO> patientConsultations(@Argument UUID patientId, @Argument ConsultationStatus status, @Argument LocalDateTime from, @Argument LocalDateTime to, @Argument Boolean onlyFuture) {
+    @PreAuthorize("hasAnyRole('MEDICO', 'ENFERMEIRO')")
+    public List<ConsultationDTO> patientConsultations(@Argument UUID patientId, @Argument ConsultationStatus status, @Argument String from, @Argument String to, @Argument Boolean onlyFuture) {
         return consultationService.patientConsultations(patientId, status, from, to, onlyFuture);
     }
 
     @QueryMapping
-    public List<ConsultationDTO> allConsultations(@Argument ConsultationStatus status, @Argument LocalDateTime from, @Argument LocalDateTime to, @Argument Boolean onlyFuture){
+    @PreAuthorize("hasAnyRole('MEDICO', 'ENFERMEIRO')")
+    public List<ConsultationDTO> allConsultations(@Argument ConsultationStatus status, @Argument String from, @Argument String to, @Argument Boolean onlyFuture){
         return consultationService.allConsultations(status, from, to, onlyFuture);
     }
 
     @MutationMapping
+    @PreAuthorize("hasRole('MEDICO')")
     public ConsultationDTO updateConsultation(@Argument UpdateConsultationInputDTO input) {
         return consultationService.update(input);
     }

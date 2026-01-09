@@ -13,10 +13,14 @@ import dev.aira.historico.mappers.UserMapper;
 import dev.aira.historico.repositories.ConsultationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -26,28 +30,39 @@ public class ConsultationService {
     private final ConsultationRepository consultationRepository;
     private final UserService userService;
 
-    public List<ConsultationDTO> myConsultations(ConsultationStatus status, LocalDateTime from, LocalDateTime to, Boolean onlyFuture) {
-        UUID patientId = UUID.randomUUID(); //será mudado após add segurança
-        //UUID patientId = SecurityUtils.getUserId(); //ajustar ao add segurança
-
+    public List<ConsultationDTO> myConsultations(ConsultationStatus status, String from, String to, Boolean onlyFuture) {
+        boolean onlyFutureSafe = Boolean.TRUE.equals(onlyFuture);
+        Jwt jwt = ((JwtAuthenticationToken)
+                Objects.requireNonNull(SecurityContextHolder.getContext()
+                        .getAuthentication()))
+                .getToken();
+        assert jwt != null;
+        UUID patientId = UUID.fromString(jwt.getSubject());
+        LocalDateTime fromDate = from != null ? LocalDateTime.parse(from) : null;
+        LocalDateTime toDate = to != null ? LocalDateTime.parse(to) : null;
         List<Consultation> consultations =
-                consultationRepository.findPatientConsultations(patientId,status, from, to, onlyFuture);
+                consultationRepository.findPatientConsultations(patientId,status, fromDate, toDate, onlyFutureSafe);
         return consultations.stream()
                 .map(this::toDTO)
                 .toList();
     }
 
-    public List<ConsultationDTO> patientConsultations(UUID patientId, ConsultationStatus status, LocalDateTime from, LocalDateTime to, Boolean onlyFuture) {
+    public List<ConsultationDTO> patientConsultations(UUID patientId, ConsultationStatus status, String from, String to, Boolean onlyFuture) {
+        boolean onlyFutureSafe = Boolean.TRUE.equals(onlyFuture);
+        LocalDateTime fromDate = from != null ? LocalDateTime.parse(from) : null;
+        LocalDateTime toDate = to != null ? LocalDateTime.parse(to) : null;
         List<Consultation> consultations =
-                consultationRepository.findPatientConsultations(patientId, status, from, to, onlyFuture);
+                consultationRepository.findPatientConsultations(patientId, status, fromDate, toDate, onlyFutureSafe);
         return consultations.stream()
                 .map(this::toDTO)
                 .toList();
     }
 
-    public List<ConsultationDTO> allConsultations(ConsultationStatus status, LocalDateTime from, LocalDateTime to, Boolean onlyFuture) {
+    public List<ConsultationDTO> allConsultations(ConsultationStatus status, String from, String to, Boolean onlyFuture) {
+        LocalDateTime fromDate = from != null ? LocalDateTime.parse(from) : null;
+        LocalDateTime toDate = to != null ? LocalDateTime.parse(to) : null;
         List<Consultation> consultations =
-                consultationRepository.findAll(status, from, to, onlyFuture);
+                consultationRepository.findAll( status, fromDate, toDate, onlyFuture);
         return consultations.stream()
                 .map(this::toDTO)
                 .toList();
@@ -60,7 +75,7 @@ public class ConsultationService {
 
         return new ConsultationDTO(
                 consultation.getId(),
-                consultation.getConsultationDate(),
+                consultation.getConsultationDate().toString(),
                 consultation.getStatus(),
                 UserMapper.toDTO(patient),
                 UserMapper.toDTO(doctor));
@@ -71,10 +86,10 @@ public class ConsultationService {
         Consultation consultation = consultationRepository.findById(input.getConsultationId())
                 .orElseThrow(() -> new ConsultationNotFoundException(input.getConsultationId()));
         if (input.getDate() != null) {
-            boolean updated = consultation.updateDate(input.getDate());
+            boolean updated = consultation.updateDate(LocalDateTime.parse(input.getDate()));
 
             if (!updated) {
-                throw new InvalidConsultationDateException(input.getDate());
+                throw new InvalidConsultationDateException(LocalDateTime.parse(input.getDate()));
             }
         }
         if (input.getDoctorId() != null) {

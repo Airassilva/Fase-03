@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -17,7 +16,7 @@ import java.util.UUID;
 @SchemaMapping(typeName = "Consultation")
 public class ConsultationDTO {
     private UUID id;
-    private LocalDateTime date;
+    private String date;
     private ConsultationStatus status;
     private UserDTO patient;
     private UserDTO doctor;

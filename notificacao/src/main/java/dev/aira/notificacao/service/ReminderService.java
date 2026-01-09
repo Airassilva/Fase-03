@@ -5,6 +5,7 @@ import dev.aira.notificacao.entities.Reminder;
 import dev.aira.notificacao.enums.ConsultationStatus;
 import dev.aira.notificacao.enums.ReminderType;
 import dev.aira.notificacao.repositories.ReminderRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class ReminderService {
     private final ReminderRepository repository;
     private final ReminderCalculatorService calculator;
 
+    @Transactional
     public void createReminder(ConsultationCreated event) {
         log.info("Evento recebido {}", event);
 
@@ -33,7 +35,7 @@ public class ReminderService {
                         status,
                         consultationDate
                 );
-
+        log.info("schedule {}", schedule);
         if (schedule == null || schedule.isBefore(LocalDateTime.now())) {
             return;
         }
@@ -45,7 +47,7 @@ public class ReminderService {
                 schedule,
                 false
         );
-
+        log.info("Salvando reminder {}", reminder);
         repository.save(reminder);
     }
 

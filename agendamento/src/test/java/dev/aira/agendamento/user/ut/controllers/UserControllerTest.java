@@ -5,9 +5,7 @@ import dev.aira.agendamento.exceptions.UserInactiveException;
 import dev.aira.agendamento.exceptions.UserNotFoundException;
 import dev.aira.agendamento.objectMother.UserMother;
 import dev.aira.agendamento.user.controller.UserController;
-import dev.aira.agendamento.user.dtos.UserRequest;
-import dev.aira.agendamento.user.dtos.UserResponse;
-import dev.aira.agendamento.user.dtos.UserUpdateRequest;
+import dev.aira.agendamento.user.dtos.*;
 import dev.aira.agendamento.user.entities.User;
 import dev.aira.agendamento.user.mapper.UserMapper;
 import dev.aira.agendamento.user.service.UserService;
@@ -23,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import java.util.List;
 import java.util.UUID;
@@ -80,6 +79,36 @@ class UserControllerTest {
         assertThrows(
                 ExistingEmailException.class,
                 () -> userController.createUser(userRequest));
+    }
+
+    @Test
+    void test_login_success() {
+        LoginRequest loginRequest = UserMother.loginRequest();
+        LoginResponse loginResponse = UserMother.loginResponse();
+
+        when(userService.login(loginRequest))
+                .thenReturn(loginResponse);
+
+        ResponseEntity<LoginResponse> response =
+                userController.login(loginRequest);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+        assertThat(response.getBody(), notNullValue());
+        assertThat(response.getBody().accessToken(), is(loginResponse.accessToken()));
+        assertThat(response.getBody().expiresIn(), is(loginResponse.expiresIn()));
+    }
+
+    @Test
+    void test_login_invalid_credentials() {
+        LoginRequest loginRequest = UserMother.loginRequest();
+
+        when(userService.login(loginRequest))
+                .thenThrow(BadCredentialsException.class);
+
+        assertThrows(
+                BadCredentialsException.class,
+                () -> userController.login(loginRequest)
+        );
     }
 
     @Test

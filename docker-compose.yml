@@ -16,14 +16,11 @@ services:
     networks:
       - app-network
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "mysqladmin ping -uroot -p$MYSQL_ROOT_PASSWORD --silent"
-        ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}" ]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   postgres_historico:
     image: postgres:16
@@ -132,6 +129,7 @@ services:
       SPRING_MAIL_PORT: 587
       SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
       SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+      SERVICE_JWT_TOKEN: ${SERVICE_JWT_TOKEN}
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     depends_on:
       mysql:
@@ -159,6 +157,7 @@ services:
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      SERVICE_JWT_TOKEN: ${SERVICE_JWT_TOKEN}
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006
     depends_on:
       kafka:

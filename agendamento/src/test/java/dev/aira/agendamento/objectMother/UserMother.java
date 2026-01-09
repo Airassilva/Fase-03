@@ -1,8 +1,6 @@
 package dev.aira.agendamento.objectMother;
 
-import dev.aira.agendamento.user.dtos.UserRequest;
-import dev.aira.agendamento.user.dtos.UserResponse;
-import dev.aira.agendamento.user.dtos.UserUpdateRequest;
+import dev.aira.agendamento.user.dtos.*;
 import dev.aira.agendamento.user.entities.UserType;
 import dev.aira.agendamento.user.entities.User;
 
@@ -59,5 +57,13 @@ public class UserMother {
 
     public static UserRequest  userRequest() {
         return new UserRequest("teste","teste@email.com", "1234", UserType.MEDICO);
+    }
+
+    public static LoginRequest loginRequest() {
+        return new LoginRequest("larisa@email.com", "1234");
+    }
+
+    public static LoginResponse loginResponse() {
+        return new LoginResponse("jwt-acess-token", 300L);
     }
 }

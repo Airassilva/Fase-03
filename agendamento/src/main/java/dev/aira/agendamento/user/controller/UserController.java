@@ -1,8 +1,6 @@
 package dev.aira.agendamento.user.controller;
 
-import dev.aira.agendamento.user.dtos.UserRequest;
-import dev.aira.agendamento.user.dtos.UserResponse;
-import dev.aira.agendamento.user.dtos.UserUpdateRequest;
+import dev.aira.agendamento.user.dtos.*;
 import dev.aira.agendamento.user.entities.User;
 import dev.aira.agendamento.user.mapper.UserMapper;
 import dev.aira.agendamento.user.service.UserService;
@@ -12,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -32,12 +31,18 @@ public class UserController {
                                 .body(userMapper.toResponse(usuarioSalvo));
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest  loginRequest) {
+        return ResponseEntity.ok(userService.login(loginRequest));
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> update(@RequestBody @Valid UserUpdateRequest updateRequest, @PathVariable UUID id) {
+    public ResponseEntity<UserResponse> update(@Valid @RequestBody UserUpdateRequest updateRequest, @PathVariable UUID id) {
         User userUpdated = userService.update(id, updateRequest);
         return ResponseEntity.ok(userMapper.toResponse(userUpdated));
     }
 
+    @PreAuthorize("hasRole('SERVICE')")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> findById(@PathVariable UUID id) {
         User user = userService.findById(id);

@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -23,6 +24,7 @@ public class ConsultationController {
     private final ConsultationMapper  consultationMapper;
     private final ConsultationProducer consultationProducer;
 
+    @PreAuthorize("hasRole('ENFERMEIRO')")
     @PostMapping
     public ResponseEntity<ConsultationResponse> createConsultation(@Valid @RequestBody ConsultationRequest request) {
         Consultation consultationEntity = consultationMapper.toEntity(request);
@@ -32,6 +34,7 @@ public class ConsultationController {
                 .body(consultationMapper.toResponse(consultationSave));
     }
 
+    @PreAuthorize("hasAnyRole('MEDICO', 'ENFERMEIRO')")
     @PutMapping("/{id}")
     public ResponseEntity<ConsultationResponse> updateConsultation(@PathVariable UUID id, @Valid @RequestBody ConsultationUpdateRequest updateRequest) {
         Consultation consultationUpdate = consultationService.update(id, updateRequest);
@@ -39,18 +42,20 @@ public class ConsultationController {
         return ResponseEntity.ok(consultationMapper.toResponse(consultationUpdate));
     }
 
+    @PreAuthorize("hasAnyRole('PACIENTE', 'MEDICO', 'ENFERMEIRA')")
     @PatchMapping("/{id}/confirm")
     public ResponseEntity<Void> confirmConsultation(@PathVariable UUID id) {
         consultationService.confirmConsultation(id);
         return ResponseEntity.noContent().build();
     }
-
+    @PreAuthorize("hasAnyRole('MEDICO', 'ENFERMEIRO')")
     @PatchMapping("/{id}/finish")
     public ResponseEntity<Void> finishConsultation(@PathVariable UUID id) {
         consultationService.finishConsultation(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('PACIENTE', 'MEDICO', 'ENFERMEIRA')")
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<Void> cancelConsultation(@PathVariable UUID id) {
         consultationService.cancelConsultation(id);

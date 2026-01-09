@@ -9,7 +9,7 @@ public class ActiveUserValidation implements UserUpdateValidation{
 
     @Override
     public void validation(User user) {
-        if (!user.isActive()) {
+        if (Boolean.FALSE.equals(user.getActive())) {
             throw new UserInactiveException(user.getId());
         }
     }

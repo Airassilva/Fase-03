@@ -1,23 +1,23 @@
 type Query {
     myConsultations(
         status: ConsultationStatus
-        from: DateTime
-        to: DateTime
+        from: String
+        to: String
         onlyFuture: Boolean = false
     ): [Consultation!]!
 
     patientConsultations(
         patientId: ID!
         status: ConsultationStatus
-        from: DateTime
-        to: DateTime
+        from: String
+        to: String
         onlyFuture: Boolean
     ): [Consultation!]!
 
     allConsultations(
         status: ConsultationStatus
-        from: DateTime
-        to: DateTime
+        from: String
+        to: String
         onlyFuture: Boolean = false
     ): [Consultation!]!
 }
